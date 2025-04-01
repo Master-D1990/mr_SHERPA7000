@@ -8,14 +8,6 @@
   
   <buildtool_depend>catkin</buildtool_depend>
   
-  <exec_depend>sherpa_bringup</exec_depend>
-  <exec_depend>sherpa_control</exec_depend>
-  <exec_depend>sherpa_description</exec_depend>
-  <exec_depend>sherpa_gazebo</exec_depend>
-  <exec_depend>sherpa_msgs</exec_depend>
-  <exec_depend>sherpa_perception</exec_depend>
-  <exec_depend>sherpa_teleop</exec_depend>
-  
   <export>
     <metapackage/>
   </export>
