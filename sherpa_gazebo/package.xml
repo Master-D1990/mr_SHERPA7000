@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>sherpa_gazebo</name>
+  <version>0.1.0</version>
+  <description>Gazebo simulation package for Sherpa robot</description>
+  <maintainer email="davidmeister90@gmail.com">MasterD</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <depend>gazebo_ros</depend>
+  <depend>gazebo_ros_control</depend>
+  <depend>sherpa_description</depend>
+  <depend>sherpa_control</depend>
+  <depend>controller_manager</depend>
+  <depend>robot_state_publisher</depend>
+  <depend>xacro</depend>
+  
+  <export>
+    <gazebo_ros gazebo_model_path="${prefix}/models"/>
+    <gazebo_ros gazebo_media_path="${prefix}/worlds"/>
+  </export>
+</package>

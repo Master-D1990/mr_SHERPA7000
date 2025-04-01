@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>sherpa</name>
+  <version>0.1.0</version>
+  <description>Metapackage for the Sherpa robot</description>
+  <maintainer email="davidmeister90@gmail.com">MasterD</maintainer>
+  <license>TODO</license>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <exec_depend>sherpa_bringup</exec_depend>
+  <exec_depend>sherpa_control</exec_depend>
+  <exec_depend>sherpa_description</exec_depend>
+  <exec_depend>sherpa_gazebo</exec_depend>
+  <exec_depend>sherpa_msgs</exec_depend>
+  <exec_depend>sherpa_perception</exec_depend>
+  <exec_depend>sherpa_teleop</exec_depend>
+  
+  <export>
+    <metapackage/>
+  </export>
+</package>

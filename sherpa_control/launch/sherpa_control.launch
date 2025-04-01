@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Lade die Controller-Parameter auf den Parameter-Server -->
+  <rosparam file="$(find sherpa_control)/config/sherpa_control.yaml" command="load"/>
+
+  <!-- Starte den Controller-Manager -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" 
+        args="sherpa/joint_state_controller 
+              sherpa/mobile_base_controller"
+        respawn="false" output="screen" />
+</launch>
