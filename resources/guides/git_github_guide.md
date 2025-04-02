@@ -127,37 +127,31 @@ git config --global user.email "deine-email@beispiel.de"
 
 ## Repository klonen
 
-### Einrichtung des Sherpa-Ordners
+### Einrichtung des sherpa-Ordners im catkin_ws
 
 ```bash
 # Im Home-Verzeichnis oder wo der catkin_ws liegt:
 cd ~
 
 # Falls catkin_ws noch nicht existiert:
-mkdir -p catkin_ws
+mkdir -p catkin_ws/src
 
-# In catkin_ws wechseln:
-cd catkin_ws
+# In catkin_ws/src wechseln:
+cd catkin_ws/src
 
-# Sherpa-Verzeichnis erstellen:
-mkdir -p Sherpa
-
-# In das Sherpa-Verzeichnis wechseln:
-cd Sherpa
-
-# Repository als src-Ordner klonen:
-git clone git@github.com:Master-D1990/mr_SHERPA7000.git src
+# Repository als sherpa-Ordner klonen:
+git clone git@github.com:Master-D1990/mr_SHERPA7000.git sherpa
 ```
 
-Nach diesem Befehl wird ein `src`-Ordner im Sherpa-Verzeichnis erstellt, der alle Dateien aus dem Repository enthält.
+Nach diesem Befehl wird ein `sherpa`-Ordner im src-Verzeichnis erstellt, der alle Dateien aus dem Repository enthält.
 
 ### Wichtig: Wo Git-Befehle ausführen
 
-Git-Befehle wie `git status`, `git pull` oder `git commit` müssen immer im `src`-Ordner ausgeführt werden, nicht im übergeordneten Sherpa-Verzeichnis:
+Git-Befehle wie `git status`, `git pull` oder `git commit` müssen immer im `sherpa`-Ordner ausgeführt werden:
 
 ```bash
-# In den src-Ordner wechseln, um Git-Befehle auszuführen:
-cd ~/catkin_ws/Sherpa/src
+# In den sherpa-Ordner wechseln, um Git-Befehle auszuführen:
+cd ~/catkin_ws/src/sherpa
 
 # Jetzt können Git-Befehle verwendet werden:
 git status
@@ -165,30 +159,20 @@ git branch
 # usw.
 ```
 
-### Alternative: Falls der src-Ordner bereits existiert
-
-```bash
-# Im Sherpa-Verzeichnis:
-cd ~/catkin_ws/Sherpa/src
-
-# Repository in aktuelles Verzeichnis klonen:
-git clone git@github.com:Master-D1990/mr_SHERPA7000.git .
-```
-
 ## Grundlegende Git-Operationen
 
-### Wichtig: Git-Befehle immer im src-Ordner ausführen
+### Wichtig: Git-Befehle immer im sherpa-Ordner ausführen
 
-Alle Git-Befehle müssen im src-Ordner ausgeführt werden, nicht im übergeordneten Sherpa-Verzeichnis:
+Alle Git-Befehle müssen im sherpa-Ordner ausgeführt werden:
 
 ```bash
-# In den src-Ordner wechseln:
-cd ~/catkin_ws/Sherpa/src
+# In den sherpa-Ordner wechseln:
+cd ~/catkin_ws/src/sherpa
 
 # Jetzt können Git-Befehle verwendet werden
 ```
 
-Wenn du versuchst, Git-Befehle im Sherpa-Verzeichnis auszuführen, erhältst du einen Fehler wie:
+Wenn du versuchst, Git-Befehle außerhalb dieses Verzeichnisses auszuführen, erhältst du einen Fehler wie:
 ```
 fatal: not a git repository (or any of the parent directories): .git
 ```
@@ -196,7 +180,7 @@ fatal: not a git repository (or any of the parent directories): .git
 ### Status überprüfen
 
 ```bash
-# Im src-Ordner ausführen:
+# Im sherpa-Ordner ausführen:
 git status
 ```
 Zeigt den aktuellen Status des Repositorys an.
