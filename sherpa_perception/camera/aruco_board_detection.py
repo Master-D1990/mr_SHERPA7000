@@ -169,8 +169,8 @@ def main():
     camera_matrix, dist_coeff = create_camera_matrix()
     
     # Versuche Kalibrierungsdaten zu laden
-    calib_file = os.path.join('/home/ros/catkin_ws/src', 
-                             'perception', 'camera', 'calibration_data.npz')
+    calib_file = os.path.join('/home/ros/catkin_ws/src/sherpa/sherpa_perception/camera', 
+                                'calibration_data.npz')
     if os.path.exists(calib_file):
         try:
             calib_data = np.load(calib_file)
