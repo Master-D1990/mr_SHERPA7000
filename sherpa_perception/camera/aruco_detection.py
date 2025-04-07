@@ -39,8 +39,8 @@ def start_preview():
     preview_process = subprocess.Popen([
         'libcamera-hello',
         '--qt-preview',
-        '--width', '1280',
-        '--height', '960',
+        '--width', '1920',
+        '--height', '1080',
         '--timeout', '0'
     ])
     print("Kamera-Vorschau gestartet")
@@ -59,8 +59,8 @@ def capture_image():
     try:
         subprocess.run([
             'libcamera-still',
-            '--width', '640',
-            '--height', '480',
+            '--width', '1920',
+            '--height', '1080',
             '-o', temp_file.name,
             '-n',
             '-t', '1'
@@ -130,9 +130,9 @@ def detect_markers(frame, aruco_dict, parameters, camera_matrix, dist_coeff):
                 if np.linalg.norm(marker_z_xz) > 0:
                     marker_z_xz = marker_z_xz / np.linalg.norm(marker_z_xz)
                 else:
-                    marker_z_xz = np.array([0, 0, -1])  # Fallback (gerade Wand)
+                    marker_z_xz = np.array([0, 0, -1])  # Fallback (Marker auf gerade Wand)
                 
-                # Referenzvektor: invertierte Z-Achse der Kamera (= Richtung zur Wand)
+                # Referenzvektor: invertierte Z-Achse der Kamera (= Richtung zur Wand mit Marker)
                 camera_z_inv = np.array([0, 0, -1])
                 
                 # Winkelberechnung zwischen diesen Vektoren
