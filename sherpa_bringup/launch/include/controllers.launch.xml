@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Load controller configurations -->
+  <rosparam command="load" file="$(find sherpa_control)/config/control.yaml" />
+
+  <!-- Spawn controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"
+        args="sherpa_joint_publisher sherpa_velocity_controller"/>
+
+  <!-- Load robot localization -->
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization" clear_params="true">
+    <rosparam command="load" file="$(find sherpa_control)/config/localization.yaml" />
+  </node>
+</launch>

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Arguments -->
+  <arg name="model_xacro" default="$(find sherpa_description)/urdf/sherpa.urdf.xacro"/>
+  <arg name="joy" default="false"/>
+
+  <!-- Load robot description -->
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model_xacro)" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+  <!-- Load controllers -->
+  <include file="$(find sherpa_bringup)/launch/include/controllers.launch.xml"/>
+
+  <!-- Load sensors -->
+  <include file="$(find sherpa_bringup)/launch/include/sensors.launch.xml"/>
+
+  <!-- Start joystick teleop if enabled -->
+  <group if="$(arg joy)">
+    <include file="$(find teleop_twist_joy)/launch/teleop.launch"/>
+  </group>
+
+</launch>

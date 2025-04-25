@@ -5,7 +5,7 @@
 
     <xacro:include filename="$(find sherpa_description)/urdf/sherpa_utils.urdf.xacro" />
     <xacro:include filename="$(find sherpa_description)/urdf/sensor_plugins/sherpa_imu.gazebo.xacro"/>
-    <xacro:include filename="$(find sherpa_description)/urdf/sensor_plugins/sherpa_gps.gazebo.xacro"/>
+    <xacro:include filename="$(find sherpa_description)/urdf/sensor_plugins/sherpa_rplidar.gazebo.xacro"/>
     <xacro:if value="$(arg lidar)">
         <xacro:include filename="$(find sherpa_description)/urdf/sensor_plugins/sherpa_velodyne.gazebo.xacro"/>
     </xacro:if>
@@ -164,8 +164,7 @@
             wheel_joint_type="${wheel_joint_type}" />
 
         <xacro:IMU base_link="${base_link_name}" simulation="${simulation}"/>
-
-        <!-- <xacro:GPS base_link="base" simulation="${simulation}"/> -->      
+        <xacro:RPLIDAR base_link="${base_link_name}" simulation="${simulation}"/>
 
         <xacro:if value="${lidar}">
             <xacro:LIDAR base_link="${base_link_name}" simulation="${simulation}"/>
