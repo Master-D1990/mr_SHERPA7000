@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!-- 
+  Comprehensive launch file for SHERPA robot with 3D voxel mapping
+  This file launches both the robot simulation and OctoMap mapping system
+-->
+<launch>
+  <!-- Arguments -->
+  <!-- Simulation arguments -->
+  <arg name="world" default="empty" doc="Gazebo world file to load"/>
+  <arg name="run_gui" default="true" doc="Whether to start Gazebo GUI"/>
+  <arg name="debug" default="false" doc="Whether to start in debug mode"/>
+  
+  <!-- OctoMap arguments -->
+  <arg name="start_octomap" default="true" doc="Whether to start the OctoMap server"/>
+  <arg name="resolution" default="0.05" doc="Resolution of the octree map in meters"/>
+  <arg name="pointcloud_topic" default="/rslidar_points" doc="Topic for incoming point cloud data"/>
+  <arg name="filter_ground" default="true" doc="Whether to filter out ground plane"/>
+  <arg name="rviz_config" default="$(find sherpa_description)/rviz/sherpa_octomap.rviz" doc="Path to RViz config file"/>
+  
+  <!-- Launch Gazebo simulation -->
+  <include file="$(find sherpa_gazebo)/launch/sherpa_gazebo.launch">
+    <arg name="world" value="$(arg world)"/>
+    <arg name="run_gui" value="$(arg run_gui)"/>
+    <arg name="debug" value="$(arg debug)"/>
+  </include>
+  
+  <!-- Launch robot controllers - fixed path to control.launch instead of sherpa_control.launch -->
+  <include file="$(find sherpa_control)/launch/control.launch"/>
+  
+  <!-- Launch OctoMap server -->
+  <group if="$(arg start_octomap)">
+    <include file="$(find sherpa_bringup)/launch/octomap.launch">
+      <arg name="resolution" value="$(arg resolution)"/>
+      <arg name="pointcloud_topic" value="$(arg pointcloud_topic)"/>
+      <arg name="filter_ground" value="$(arg filter_ground)"/>
+    </include>
+  </group>
+  
+  <!-- Start RViz with OctoMap configuration -->
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_config)"/>
+  
+  <!-- Display startup message -->
+  <node pkg="rostopic" type="rostopic" name="startup_message" args="pub /startup_info std_msgs/String 'data: &quot;SHERPA 3D mapping system started. Point cloud topic: $(arg pointcloud_topic), Map resolution: $(arg resolution)m&quot;'" output="screen"/>
+</launch>

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!-- 
+  Launch file zur Visualisierung von 3D Voxel-Karten (OctoMap) für den SHERPA-Roboter
+-->
+<launch>
+  <!-- Arguments -->
+  <arg name="rviz_config" default="$(find sherpa_bringup)/rviz/sherpa_voxel.rviz" doc="RViz-Konfigurationsdatei"/>
+  <arg name="resolution" default="0.1" doc="Auflösung der OctoMap (in Metern)"/>
+  <arg name="frame_id" default="map" doc="Der TF-Frame, in dem die OctoMap aufgebaut wird"/>
+  <arg name="sensor_model_max_range" default="5.0" doc="Maximale Reichweite des Sensors in Metern"/>
+  
+  <!-- Start OctoMap Server -->
+  <node pkg="octomap_server" type="octomap_server_node" name="octomap_server" output="screen">
+    <param name="resolution" value="$(arg resolution)"/>
+    <param name="frame_id" value="$(arg frame_id)"/>
+    <param name="sensor_model/max_range" value="$(arg sensor_model_max_range)"/>
+    
+    <!-- LaserScan (2D) zu OctoMap (3D) Konvertierung -->
+    <param name="height_map" value="false"/>
+    <param name="colored_map" value="false"/>
+    <param name="filter_ground" value="false"/>
+    <param name="ground_filter/distance" value="0.04"/>
+    <param name="ground_filter/angle" value="0.15"/>
+    <param name="ground_filter/plane_distance" value="0.07"/>
+    
+    <!-- Eingabe: LaserScan-Daten vom LiDAR -->
+    <remap from="scan" to="/scan"/>
+    
+    <!-- Debug-Informationen -->
+    <param name="latch" value="false"/>
+    <param name="base_frame_id" value="base_link"/>
+  </node>
+  
+  <!-- Starte RViz mit der OctoMap-spezifischen Konfiguration -->
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_config)"/>
+</launch>

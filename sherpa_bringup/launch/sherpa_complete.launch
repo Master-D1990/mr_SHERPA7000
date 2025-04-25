@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+  Comprehensive launch file for SHERPA robot with simulation, 
+  teleop control and OctoMap voxel visualization.
+-->
+<launch>
+  <!-- Arguments -->
+  <!-- Simulation arguments -->
+  <arg name="world" default="big_map_summer_school" doc="Gazebo world file to load"/>
+  <arg name="run_gui" default="true" doc="Whether to start Gazebo GUI"/>
+  <arg name="headless" default="false" doc="Run without GUI"/>
+  
+  <!-- OctoMap arguments -->
+  <arg name="resolution" default="0.05" doc="Resolution of the octree map in meters"/>
+  <arg name="pointcloud_topic" default="/rslidar_points" doc="Topic for incoming point cloud data"/>
+  <arg name="filter_ground" default="true" doc="Whether to filter out ground plane"/>
+  
+  <!-- TF configurations -->
+  <arg name="robot_namespace" default=""/>
+  <arg name="robot_description" default="robot_description"/>
+  
+  <!-- Launch Gazebo simulation with Teleop -->
+  <include file="$(find sherpa_gazebo)/launch/sherpa_gazebo.launch">
+    <arg name="world" value="$(arg world)"/>
+    <arg name="run_gui" value="$(arg run_gui)"/>
+    <arg name="headless" value="$(arg headless)"/>
+    <arg name="start_teleop" value="true"/> <!-- Always include teleop -->
+    <arg name="robot_namespace" value="$(arg robot_namespace)"/>
+    <arg name="robot_description" value="$(arg robot_description)"/>
+  </include>
+  
+  <!-- Launch OctoMap server directly here rather than including it multiple times -->
+  <node pkg="octomap_server" type="octomap_server_node" name="octomap_server" output="screen">
+    <param name="frame_id" value="map"/>
+    <param name="resolution" value="$(arg resolution)"/>
+    <param name="sensor_model/max_range" value="5.0"/>
+    <param name="filter_ground" value="$(arg filter_ground)"/>
+    <remap from="cloud_in" to="$(arg pointcloud_topic)"/>
+  </node>
+  
+  <!-- Start RViz with Custom Configuration for OctoMap Visualization -->
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find sherpa_bringup)/rviz/sherpa_voxel.rviz"/>
+</launch>

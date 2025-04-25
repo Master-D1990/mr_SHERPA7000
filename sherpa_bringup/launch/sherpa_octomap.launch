@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!-- 
+  Main launch file for SHERPA with OctoMap-based 3D mapping
+  This launches the OctoMap server and visualizes the map in RViz
+-->
+<launch>
+  <!-- Arguments -->
+  <arg name="rviz_config" default="$(find sherpa_description)/rviz/sherpa_octomap.rviz" doc="Path to RViz config file"/>
+  <arg name="start_octomap" default="true" doc="Whether to start OctoMap server"/>
+  <arg name="resolution" default="0.05" doc="Resolution of the octree map in meters"/>
+  <!-- Use rslidar_points as default since it's the active topic -->
+  <arg name="pointcloud_topic" default="/rslidar_points" doc="Topic for incoming point cloud data"/>
+  <arg name="filter_ground" default="true" doc="Whether to filter out ground plane"/>
+  <arg name="sensor_model_max_range" default="5.0" doc="Maximum range for sensor measurements"/>
+  
+  <!-- Start RViz -->
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_config)"/>
+
+  <!-- Start robot state publisher if not already running -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+        unless="$(eval arg('running_nodes').count('/robot_state_publisher') > 0)"/>
+        
+  <!-- Start OctoMap if requested -->
+  <group if="$(arg start_octomap)">
+    <include file="$(find sherpa_bringup)/launch/octomap.launch">
+      <arg name="resolution" value="$(arg resolution)"/>
+      <arg name="pointcloud_topic" value="$(arg pointcloud_topic)"/>
+      <arg name="filter_ground" value="$(arg filter_ground)"/>
+      <arg name="sensor_model_max_range" value="$(arg sensor_model_max_range)"/>
+    </include>
+  </group>
+</launch>

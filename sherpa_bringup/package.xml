@@ -22,6 +22,12 @@
   <exec_depend>teleop_twist_joy</exec_depend>
   <exec_depend>gazebo_ros</exec_depend>
   <exec_depend>rviz</exec_depend>
+  
+  <!-- OctoMap dependencies -->
+  <exec_depend>octomap</exec_depend>
+  <exec_depend>octomap_rviz_plugins</exec_depend>
+  <exec_depend>octomap_ros</exec_depend>
+  <exec_depend>octomap_server</exec_depend>
 
   <export>
   </export>

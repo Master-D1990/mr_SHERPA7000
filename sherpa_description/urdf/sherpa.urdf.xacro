@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="sherpa">
 
-    <xacro:arg name="lidar" default="true"/>
+    <xacro:arg name="lidar" default="false"/>
 
     <xacro:include filename="$(find sherpa_description)/urdf/sherpa_utils.urdf.xacro" />
     <xacro:include filename="$(find sherpa_description)/urdf/sensor_plugins/sherpa_imu.gazebo.xacro"/>

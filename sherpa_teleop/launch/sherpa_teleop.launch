@@ -1,6 +1,6 @@
 <launch>
-    <!-- Verwende den spezifischen Node-Pfad zu better_teleop -->
-    <node name="better_teleop" pkg="better_teleop" type="better_teleop.py">
+    <!-- Verwende das Skript direkt aus dem sherpa_teleop Paket -->
+    <node name="sherpa_teleop" pkg="sherpa_teleop" type="better_teleop.py">
         <param name="cmd_topic" value="/cmd_vel"/>
         <param name="forward_rate" value="1.0"/>
         <param name="backward_rate" value="1.0"/>
