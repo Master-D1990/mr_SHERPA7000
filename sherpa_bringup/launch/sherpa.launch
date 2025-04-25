@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<!-- 
+  Haupt-Launch-Datei für den SHERPA-Roboter in der realen Welt
+  Diese Datei startet alle erforderlichen Komponenten für den realen Betrieb:
+  - Roboter-Beschreibung und State Publisher
+  - Controller
+  - Sensoren und Treiber
+  - Tastatur-Teleop-Steuerung
+  - Optional: OctoMap für 3D-Mapping
+-->
+<launch>
+  <!-- Allgemeine Argumente -->
+  <arg name="model_xacro" default="$(find sherpa_description)/urdf/sherpa.urdf.xacro"/>
+  <arg name="lidar_enabled" default="true" doc="2D-LiDAR aktivieren"/>
+  <arg name="enable_octomap" default="false" doc="OctoMap-Mapping aktivieren"/>
+  <arg name="use_rviz" default="true" doc="RViz für die Visualisierung starten"/>
+
+  <!-- OctoMap-Parameter -->
+  <arg name="octomap_resolution" default="0.1" doc="Auflösung der OctoMap in Metern"/>
+  <arg name="sensor_range" default="5.0" doc="Maximale Sensorreichweite für OctoMap"/>
+
+  <!-- 1. Lade Roboter-Beschreibung -->
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model_xacro)" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+  <!-- 2. Lade Controller -->
+  <include file="$(find sherpa_control)/launch/control.launch"/>
+
+  <!-- 3. Starte LiDAR-Treiber wenn aktiviert -->
+  <group if="$(arg lidar_enabled)">
+    <include file="$(find sherpa_perception)/rplidar_ros/launch/sherpa_rplidar.launch"/>
+  </group>
+
+  <!-- 4. Starte Tastatur-Teleop-Steuerung -->
+  <include file="$(find sherpa_teleop)/launch/better_teleop_sherpa.launch" />
+
+  <!-- 5. Starte RViz für die Visualisierung (wenn aktiviert) -->
+  <group if="$(arg use_rviz)">
+    <node pkg="rviz" type="rviz" name="rviz" 
+          args="-d $(find sherpa_description)/rviz/sherpa.rviz"
+          unless="$(arg enable_octomap)"/>
+  </group>
+
+  <!-- 6. Starte OctoMap für 3D-Mapping (wenn aktiviert) -->
+  <group if="$(arg enable_octomap)">
+    <!-- Start OctoMap Server konfiguriert für LaserScan-Eingabe -->
+    <node pkg="octomap_server" type="octomap_server_node" name="octomap_server" output="screen">
+      <param name="resolution" value="$(arg octomap_resolution)"/>
+      <param name="frame_id" value="map"/>
+      <param name="sensor_model/max_range" value="$(arg sensor_range)"/>
+      
+      <!-- LaserScan-spezifische Konfiguration -->
+      <param name="height_map" value="false"/>
+      <param name="colored_map" value="false"/>
+      <param name="filter_ground" value="false"/>
+      <param name="ground_filter/distance" value="0.04"/>
+      <param name="ground_filter/angle" value="0.15"/>
+      <param name="ground_filter/plane_distance" value="0.07"/>
+      
+      <!-- Eingabe: LaserScan-Daten vom LiDAR -->
+      <remap from="scan" to="/scan"/>
+      
+      <!-- Basis-Frame für die Transformation -->
+      <param name="base_frame_id" value="base_link"/>
+    </node>
+    
+    <!-- Starte RViz mit OctoMap-Konfiguration -->
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find sherpa_description)/rviz/sherpa_octomap.rviz"/>
+  </group>
+</launch>
