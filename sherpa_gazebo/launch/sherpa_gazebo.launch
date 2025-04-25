@@ -12,7 +12,7 @@
   <arg name="enable_ekf"                            default="true"/>
 
   <!-- Name of the world -->
-  <arg name="world"                                 default="big_map_summer_school"/>
+  <arg name="world"                                 default="empty"/>
   <!-- Path to the world file -->
   <arg name="world_file"                            default="$(find sherpa_gazebo)/worlds/$(arg world).world"/>
   <arg name="laser_enabled"							            default="true"/>
@@ -89,10 +89,10 @@
             # 2->inf : Parallelism level
             concurrency_level: 1
         </rosparam>
-  </node>
+  </node>_
 
 
-  <include file="$(find sherpa_control)/launch/sherpa_control.launch">
+  <include file="$(find sherpa_control)/launch/control.launch">
     <arg name="simulation"      default="true"/>
     <arg name="robot_namespace"     default="$(arg robot_namespace)"/>
     <arg name="robot_description"   default="$(arg robot_description)"/>

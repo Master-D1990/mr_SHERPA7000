@@ -2,21 +2,27 @@ cmake_minimum_required(VERSION 3.0.2)
 project(sherpa_description)
 
 find_package(catkin REQUIRED COMPONENTS
-  urdf
-  xacro
-  robot_state_publisher
-  joint_state_publisher
+    xacro
+    hector_gazebo_plugins
+    urdf
+    roslib
 )
 
 catkin_package(
-  CATKIN_DEPENDS urdf xacro
+  INCLUDE_DIRS
+  LIBRARIES ${PROJECT_NAME}
+  CATKIN_DEPENDS
+    xacro
+    hector_gazebo_plugins
 )
 
-include_directories(
-  ${catkin_INCLUDE_DIRS}
+add_definitions("--std=c++11")
+include_directories(${catkin_INCLUDE_DIRS})
+
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
-# Installationsregeln
-install(DIRECTORY urdf meshes
+install(DIRECTORY launch rviz urdf resources
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )

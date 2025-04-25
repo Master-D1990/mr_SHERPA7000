@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+
+<robot name="smb" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:macro name="depth_sensor_plugin" params="name rate">
+    <!--                              Imu  Properties 				          	-->
+    <xacro:property name="depth_base_link"		value="${base_link}"/>
+    <xacro:property name="depth_origin_rpy"		value="0 0 0"/>
+    <!-- Kamera 1 Meter über dem Roboter -->
+    <xacro:property name="depth_origin_xyz"		value="0.2554 -0.02397 ${1.0+chassisHeight/2.0}"/>
+
+<gazebo reference="${name}_depth_frame">
+    <sensor type="depth" name="${name}">
+      <pose>0 0 0 0 0 0</pose>
+     <visualize>false</visualize>
+     <update_rate>${rate}</update_rate>
+     <camera>
+          <horizontal_fov>1.518436</horizontal_fov>
+          <image>
+            <width>1280</width>
+            <height>720</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.05</near>
+            <far>11</far>
+          </clip>
+     </camera>
+	 <plugin name="${name}_plugin" filename="libgazebo_ros_openni_kinect.so">
+          <baseline>0.05 </baseline>
+          <alwaysOn>true</alwaysOn>
+          <!-- Keep this zero, update_rate in the parent <sensor> tag
+            will control the frame rate. -->
+          <updateRate>0.0</updateRate>
+          <cameraName>${name}_ir</cameraName>
+          <imageTopicName>/${name}/color/image_raw</imageTopicName>
+          <cameraInfoTopicName>/${name}/color/camera_info</cameraInfoTopicName>
+          <depthImageTopicName>/${name}/depth/image_raw</depthImageTopicName>
+          <depthImageCameraInfoTopicName>/${name}/depth/camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>/${name}/depth/points</pointCloudTopicName>
+          <frameName>${name}_depth_optical_frame</frameName>
+          <pointCloudCutoff>0.10</pointCloudCutoff>
+          <pointCloudCutoffMax>4.0</pointCloudCutoffMax>
+          <distortionK1>0</distortionK1>
+          <distortionK2>0</distortionK2>
+          <distortionK3>0</distortionK3>
+          <distortionT1>0</distortionT1>
+          <distortionT2>0</distortionT2>
+          <CxPrime>0</CxPrime>
+          <Cx>0</Cx>
+          <Cy>0</Cy>
+          <focalLength>0</focalLength>
+          <hackBaseline>0</hackBaseline>
+     </plugin>
+    </sensor>
+    </gazebo>
+
+
+    <!-- Depth camera link-->
+    <link name="depth_link">
+        <inertial>
+        <mass value="0.001"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.0001"/>
+      </inertial>
+            <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+        <!-- <box size="0.04 0.05 0.02"/> -->
+        <mesh filename="package://smb_description/urdf/new_payload/meshes/SMB_blackfly.dae"/>
+      </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <!-- <box size=".001 .001 .001"/> -->
+          <mesh filename="package://smb_description/urdf/new_payload/meshes/SMB_blackfly.dae"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="depth_camera_joint" type="fixed">
+      <origin xyz="${depth_origin_xyz}" rpy="${depth_origin_rpy}"/>
+      <parent link="${depth_base_link}"/>
+      <child link="depth_link"/>
+    </joint>
+    
+    <!-- Verwende den Parameter für den Plugin-Namen korrekt -->
+    <xacro:depth_sensor_plugin name="${name}" rate="${rate}"/>
+
+</xacro:macro>
+</robot>

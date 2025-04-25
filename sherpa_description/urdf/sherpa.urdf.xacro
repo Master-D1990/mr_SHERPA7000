@@ -1,33 +1,15 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="sherpa">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="smb">
 
     <xacro:arg name="lidar" default="true"/>
 
-    <!-- Fehlende Properties definieren -->
-    <xacro:property name="base_link_name" value="base_link"/>
-    <xacro:property name="wheelRadius" value="0.125"/>
-    <xacro:property name="wheelWidth" value="0.1"/>
-    <xacro:property name="wheelMass" value="1.0"/>
-    <xacro:property name="chassisLength" value="0.6"/>
-    <xacro:property name="chassisWidth" value="0.4"/>
-    <xacro:property name="chassisHeight" value="0.15"/>
-    <xacro:property name="chassisMass" value="10.0"/>
-    <xacro:property name="frontWheelX" value="0.2"/>
-    <xacro:property name="backWheelX" value="-0.2"/>
-    <xacro:property name="wheelClearance" value="0.05"/>
-    <xacro:property name="wheelHeight" value="0.0"/>
-    <xacro:property name="topLength" value="0.5"/>
-    <xacro:property name="topWidth" value="0.35"/>
-    <xacro:property name="topHeight" value="0.1"/>
-    <xacro:property name="topXOffset" value="0.0"/>
-
-    <xacro:include filename="$(find sherpa_description)/urdf/sherpa_utils.urdf.xacro" />
-    <xacro:include filename="$(find sherpa_description)/urdf/sensor_plugins/sherpa_imu.gazebo.xacro"/>
-    <!--<xacro:include filename="$(find sherpa_description)/urdf/sensor_plugins/sherpa_gps.gazebo.xacro"/> -->
+    <xacro:include filename="$(find smb_description)/urdf/smb_utils.urdf.xacro" />
+    <xacro:include filename="$(find smb_description)/urdf/sensor_plugins/smb_imu.gazebo.xacro"/>
+    <xacro:include filename="$(find smb_description)/urdf/sensor_plugins/smb_gps.gazebo.xacro"/>
     <xacro:if value="$(arg lidar)">
-        <xacro:include filename="$(find sherpa_description)/urdf/sensor_plugins/sherpa_velodyne.gazebo.xacro"/>
+        <xacro:include filename="$(find smb_description)/urdf/sensor_plugins/smb_velodyne.gazebo.xacro"/>
     </xacro:if>
-    <xacro:include filename="$(find sherpa_description)/urdf/sherpa_lidar_mount.urdf.xacro"/>
+    <xacro:include filename="$(find smb_description)/urdf/smb_lidar_mount.urdf.xacro"/>
 
     <xacro:property name="PI" value="3.1415926535897931"/>
 
@@ -47,18 +29,14 @@
             <collision>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
-                    <cylinder length="${wheelWidth}" radius="${wheelRadius}"/>
+                    <cylinder length="${wheelWidth/10}" radius="${wheelRadius}"/>
                 </geometry>
             </collision>
             <visual>
-                <origin xyz="0 0 0" rpy="0 0 0" />
+                <origin xyz="0 0 0" rpy="1.570796 0  0" />
                 <geometry>
-                    <!-- Ersetze Mesh durch primitives Geometrieelement -->
-                    <cylinder length="${wheelWidth}" radius="${wheelRadius}"/>
+                    <mesh filename="package://smb_description/urdf/meshes/wheel.dae" />
                 </geometry>
-                <material name="wheel_material">
-                    <color rgba="0.2 0.2 0.2 1.0"/>
-                </material>
             </visual>
             <inertial>
                 <origin xyz="0 0 0" rpy="0 0 0" />
@@ -87,9 +65,12 @@
                 <mechanicalReduction>${transmission_reduction}</mechanicalReduction>
             </actuator>
         </transmission>
+
+
     </xacro:macro>
 
     <xacro:macro name="chassis">
+
         <link name="${base_link_name}">
             <collision>
                 <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -106,11 +87,6 @@
                     <color rgba="0.8 0.0 0.1 1.0"/>
                 </material>
             </visual>
-            <inertial>
-                <origin xyz="0 0 0" rpy="0 0 0"/>
-                <mass value="${chassisMass}"/>
-                <xacro:box_inertia m="${chassisMass}" x="${chassisLength}" y="${chassisWidth}" z="${chassisHeight}"/>
-            </inertial>
         </link>
 
         <link name="top">
@@ -123,18 +99,10 @@
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
-                    <!-- Ersetze Mesh durch primitives Geometrieelement -->
-                    <box size="${topLength} ${topWidth} ${topHeight}"/>
+                    <!-- <box size="${topLength} ${topWidth} ${topHeight}"/> -->
+                     <mesh filename="package://smb_description/urdf/new_payload/meshes/SMB_step.dae"/>
                 </geometry>
-                <material name="top_material">
-                    <color rgba="0.5 0.5 0.5 1.0"/>
-                </material>
             </visual>
-            <inertial>
-                <origin xyz="0 0 0" rpy="0 0 0"/>
-                <mass value="1.0"/>
-                <xacro:box_inertia m="1.0" x="${topLength}" y="${topWidth}" z="${topHeight}"/>
-            </inertial>
         </link>
 
         <gazebo reference="top">
@@ -145,33 +113,35 @@
             <material>Gazebo/Red</material>
         </gazebo>
 
-        <joint name="top_to_base_link" type="fixed">
-            <parent link="${base_link_name}"/>
-            <child link="top"/>
-            <origin xyz="0.0 0.0 ${chassisHeight/2.0}" rpy="0 0 0"/>
-        </joint>
+    <joint name="top_to_base_link" type="fixed">
+        <parent link="${base_link_name}"/>
+        <child link="top"/>
+        <!-- <origin xyz="${topXOffset/2.0} 0.0 ${chassisHeight/2.0 + topHeight/2.0}" rpy="0 0 0"/> -->
+        <origin xyz="0.0 0.0 ${chassisHeight/2.0}" rpy="0 0 0"/>
+    </joint>
 
-        <!-- Fixed joint to add dummy inertia link -->
-        <joint name="base_to_base_inertia" type="fixed">
-          <parent link="${base_link_name}"/>
-          <child link="base_inertia"/>
-          <origin xyz="0 0 0" rpy="0 0 0"/>
-        </joint>
+    <!-- Fixed joint to add dummy inertia link -->
+    <joint name="base_to_base_inertia" type="fixed">
+      <parent link="${base_link_name}"/>
+      <child link="base_inertia"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
 
-        <!-- Dummy inertia link, because KDL cannot have inertia on the base link -->
-        <link name="base_inertia">
-          <inertial>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
-            <mass value="${chassisMass}"/>
-            <xacro:box_inertia m="${chassisMass}"
-                         x="${chassisLength}"
-                         y="${chassisWidth}"
-                         z="${chassisHeight}"/>
-          </inertial>
-        </link>
+    <!-- Dummy inertia link, because KDL cannot have inertia on the base link -->
+    <link name="base_inertia">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="${chassisMass}"/>
+        <xacro:box_inertia m="${chassisMass}"
+                     x="${chassisLength}"
+                     y="${chassisWidth}"
+                     z="${chassisHeight}"/>
+      </inertial>
+    </link>
+
     </xacro:macro>
 
-    <xacro:macro name="sherpa" params="wheel_joint_type:=continuous lidar:=true simulation:=true">
+    <xacro:macro name="smb" params="wheel_joint_type:=continuous lidar:=true simulation:=true">
         <xacro:chassis/>
 
         <xacro:wheel prefix="LF" X="${frontWheelX}"
@@ -186,21 +156,21 @@
 
         <xacro:wheel prefix="LH" X="${backWheelX}"
             Y="${chassisWidth/2+wheelClearance+wheelWidth/2}"
-            wheel_joint_type="${wheel_joint_type}"
-            friction_coeff="0.0" />
+	    wheel_joint_type="${wheel_joint_type}"
+        friction_coeff="0.0" />
 
         <xacro:wheel prefix="RH" X="${backWheelX}"
             Y="${-chassisWidth/2-wheelClearance-wheelWidth/2}"
             wheel_joint_type="${wheel_joint_type}" />
 
         <xacro:IMU base_link="${base_link_name}" simulation="${simulation}"/>
- 
+
+        <!-- <xacro:GPS base_link="base" simulation="${simulation}"/> -->      
+
         <xacro:if value="${lidar}">
             <xacro:LIDAR base_link="${base_link_name}" simulation="${simulation}"/>
             <xacro:lidar_mount base_link="${base_link_name}"/>
         </xacro:if>
-    </xacro:macro>
 
-    <!-- Instanziieren des Sherpa-Roboters -->
-    <xacro:sherpa wheel_joint_type="continuous" lidar="$(arg lidar)" simulation="true"/>
+    </xacro:macro>
 </robot>

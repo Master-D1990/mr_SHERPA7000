@@ -1,19 +1,30 @@
 <?xml version="1.0"?>
-<package format="2">
+<package>
   <name>sherpa_control</name>
-  <version>0.1.0</version>
-  <description>Control package for Sherpa robot</description>
-  <maintainer email="davidmeister90@gmail.com">MasterD</maintainer>
-  <license>TODO</license>
+  <version>0.0.1</version>
+  <description>sherpa controller configurations</description>
+
+  <author email="ej@ethz.ch">Edo Jelavic</author>
+  <maintainer email="ej@ethz.ch">Edo Jelavic</maintainer>
+  <license>BSD</license>
+
 
   <buildtool_depend>catkin</buildtool_depend>
-  
-  <depend>controller_manager</depend>
-  <depend>joint_state_controller</depend>
-  <depend>diff_drive_controller</depend>
-  <depend>robot_state_publisher</depend>
-  <depend>roscpp</depend>
-  <depend>std_msgs</depend>
-  <depend>geometry_msgs</depend>
-  <depend>sensor_msgs</depend>
+  <build_depend>roslaunch</build_depend>
+
+  <run_depend>sherpa_description</run_depend>
+  <run_depend>interactive_marker_twist_server</run_depend>
+  <run_depend>diff_drive_controller</run_depend>
+  <run_depend>joint_state_controller</run_depend>
+  <run_depend>joint_trajectory_controller</run_depend>
+  <run_depend>joy</run_depend>
+  <run_depend>robot_localization</run_depend>
+  <run_depend>rostopic</run_depend>
+  <run_depend>robot_state_publisher</run_depend>
+  <run_depend>controller_manager</run_depend>
+  <run_depend>teleop_twist_joy</run_depend>
+  <run_depend>twist_mux</run_depend>
+
+  <export>
+  </export>
 </package>

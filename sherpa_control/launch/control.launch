@@ -5,7 +5,7 @@
   <arg name="robot_namespace" 		default=""/>
   <arg name="enable_ekf" 			    default="true"/>
   <arg name="robot_description"  	default="robot_description"/>
-  <arg name="description_file"    default="$(find sherpa_description)/urdf/sherpa.urdf.xacro"/>
+  <arg name="description_file"    default="$(find sherpa_description)/urdf/sherpa_standalone.urdf.xacro"/>
 
   <!-- Load robot description -->
     <!-- Load robot description for gazebo -->
@@ -18,7 +18,7 @@
   </include>
 
   <!-- Load controller configuration -->
-  <rosparam command="load" file="$(find sherpa_control)/config/sherpa_control.yaml" />
+  <rosparam command="load" file="$(find sherpa_control)/config/control.yaml" />
 
   <!-- Spawn controllers -->
   <node name="base_controller_spawner" pkg="controller_manager" type="spawner"
