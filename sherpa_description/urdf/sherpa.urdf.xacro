@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="smb">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="sherpa">
 
     <xacro:arg name="lidar" default="true"/>
 
-    <xacro:include filename="$(find smb_description)/urdf/smb_utils.urdf.xacro" />
-    <xacro:include filename="$(find smb_description)/urdf/sensor_plugins/smb_imu.gazebo.xacro"/>
-    <xacro:include filename="$(find smb_description)/urdf/sensor_plugins/smb_gps.gazebo.xacro"/>
+    <xacro:include filename="$(find sherpa_description)/urdf/sherpa_utils.urdf.xacro" />
+    <xacro:include filename="$(find sherpa_description)/urdf/sensor_plugins/sherpa_imu.gazebo.xacro"/>
+    <xacro:include filename="$(find sherpa_description)/urdf/sensor_plugins/sherpa_gps.gazebo.xacro"/>
     <xacro:if value="$(arg lidar)">
-        <xacro:include filename="$(find smb_description)/urdf/sensor_plugins/smb_velodyne.gazebo.xacro"/>
+        <xacro:include filename="$(find sherpa_description)/urdf/sensor_plugins/sherpa_velodyne.gazebo.xacro"/>
     </xacro:if>
-    <xacro:include filename="$(find smb_description)/urdf/smb_lidar_mount.urdf.xacro"/>
+    <xacro:include filename="$(find sherpa_description)/urdf/sherpa_lidar_mount.urdf.xacro"/>
 
     <xacro:property name="PI" value="3.1415926535897931"/>
 
@@ -35,7 +35,7 @@
             <visual>
                 <origin xyz="0 0 0" rpy="1.570796 0  0" />
                 <geometry>
-                    <mesh filename="package://smb_description/urdf/meshes/wheel.dae" />
+                    <mesh filename="package://sherpa_description/urdf/meshes/wheel.dae" />
                 </geometry>
             </visual>
             <inertial>
@@ -100,7 +100,7 @@
                 <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
                     <!-- <box size="${topLength} ${topWidth} ${topHeight}"/> -->
-                     <mesh filename="package://smb_description/urdf/new_payload/meshes/SMB_step.dae"/>
+                     <mesh filename="package://sherpa_description/urdf/new_payload/meshes/sherpa_step.dae"/>
                 </geometry>
             </visual>
         </link>
@@ -141,7 +141,7 @@
 
     </xacro:macro>
 
-    <xacro:macro name="smb" params="wheel_joint_type:=continuous lidar:=true simulation:=true">
+    <xacro:macro name="sherpa" params="wheel_joint_type:=continuous lidar:=true simulation:=true">
         <xacro:chassis/>
 
         <xacro:wheel prefix="LF" X="${frontWheelX}"

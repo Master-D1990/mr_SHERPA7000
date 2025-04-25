@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<robot name="smb" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="sherpa" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
 <xacro:macro name="depth_sensor_plugin" params="name rate">
     <!--                              Imu  Properties 				          	-->
@@ -67,14 +67,14 @@
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
         <!-- <box size="0.04 0.05 0.02"/> -->
-        <mesh filename="package://smb_description/urdf/new_payload/meshes/SMB_blackfly.dae"/>
+        <mesh filename="package://sherpa_description/urdf/new_payload/meshes/sherpa_blackfly.dae"/>
       </geometry>
       </visual>
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
           <!-- <box size=".001 .001 .001"/> -->
-          <mesh filename="package://smb_description/urdf/new_payload/meshes/SMB_blackfly.dae"/>
+          <mesh filename="package://sherpa_description/urdf/new_payload/meshes/sherpa_blackfly.dae"/>
         </geometry>
       </collision>
     </link>

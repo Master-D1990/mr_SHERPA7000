@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="smb">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="sherpa">
 
   <!-- Arguments -->
   <xacro:arg name="wheel_joint_type"          default="fixed"/> <!-- continuous for gazebo -->
@@ -11,17 +11,17 @@
 
   <xacro:property name="lidar" value="$(arg lidar)"/>
       <!-- Includes -->
-  <xacro:include filename="$(find smb_description)/urdf/smb_big_properties.urdf.xacro" />
-  <xacro:include filename="$(find smb_description)/urdf/smb.urdf.xacro"/>
+  <xacro:include filename="$(find sherpa_description)/urdf/sherpa_big_properties.urdf.xacro" />
+  <xacro:include filename="$(find sherpa_description)/urdf/sherpa.urdf.xacro"/>
 
-  <xacro:smb wheel_joint_type="$(arg wheel_joint_type)" simulation="$(arg simulation)"/>
+  <xacro:sherpa wheel_joint_type="$(arg wheel_joint_type)" simulation="$(arg simulation)"/>
   
 
   <!-- Handle gazebo plugins -->
-  <xacro:include filename="$(find smb_description)/urdf/smb_ros_skid_steer.gazebo.xacro"/>
+  <xacro:include filename="$(find sherpa_description)/urdf/sherpa_ros_skid_steer.gazebo.xacro"/>
 
  
-  <xacro:smb_ros_skid_steer_plugin description_name="$(arg description_name_xacro)"
+  <xacro:sherpa_ros_skid_steer_plugin description_name="$(arg description_name_xacro)"
       broadcast_tf="$(arg publish_tf)" robot_namespace="$(arg robot_namespace)"/>
  
 

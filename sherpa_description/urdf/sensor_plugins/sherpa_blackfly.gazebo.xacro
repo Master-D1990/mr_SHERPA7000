@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<robot name="smb" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="sherpa" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
 <xacro:macro name="blackfly_camera_plugin" params="name rate">
 

@@ -3,7 +3,7 @@
 <!-- This file contains a plugin to simulate a gps sensor attached to the robot. -->
 <!-- Documentation can be found at http://wiki.ros.org/hector_gazebo_plugins -->
 
-<robot name="smb" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="sherpa" xmlns:xacro="http://www.ros.org/wiki/xacro">
 <xacro:macro name="GPS" params="base_link simulation:=false">
 
    <!--                              Gps  Properties 	           				-->
@@ -32,7 +32,7 @@
 
     <xacro:if value="${simulation}">
     <gazebo>   
-      <plugin name="smb_gps_plugin" filename="libhector_gazebo_ros_gps.so">
+      <plugin name="sherpa_gps_plugin" filename="libhector_gazebo_ros_gps.so">
         <updateRate>${gps_update_rate}</updateRate>
         <bodyName>${gps_link}</bodyName>
         <frameId>${gps_link}</frameId>

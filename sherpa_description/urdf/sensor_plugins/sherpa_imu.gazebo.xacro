@@ -3,7 +3,7 @@
 <!-- This file contains plugins to simulate an Imu sensor attached to the robot. -->
 <!-- Documentation can be found at http://wiki.ros.org/hector_gazebo_plugins -->
 
-<robot name="smb" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="sherpa" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:macro name="IMU" params="base_link simulation">
     <!--                              Imu  Properties 				          	-->
     <xacro:property name="imu_base_link"		value="${base_link}"/>
@@ -30,7 +30,7 @@
 
     <xacro:if value="${simulation}">
     <gazebo>   
-      <plugin name="smb_imu_plugin" filename="libhector_gazebo_ros_imu.so">
+      <plugin name="sherpa_imu_plugin" filename="libhector_gazebo_ros_imu.so">
         <updateRate>${imu_update_rate}</updateRate>
         <bodyName>${imu_link}</bodyName>
         <frameId>${imu_link}</frameId>
@@ -70,14 +70,14 @@
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
         <!-- <box size="0.04 0.05 0.02"/> -->
-        <mesh filename="package://smb_description/urdf/new_payload/meshes/SMB_imu.dae"/>
+        <mesh filename="package://sherpa_description/urdf/new_payload/meshes/sherpa_imu.dae"/>
       </geometry>
       </visual>
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
           <!-- <box size=".001 .001 .001"/> -->
-          <mesh filename="package://smb_description/urdf/new_payload/meshes/SMB_imu.dae"/>
+          <mesh filename="package://sherpa_description/urdf/new_payload/meshes/sherpa_imu.dae"/>
         </geometry>
       </collision>
       <material name="orange">

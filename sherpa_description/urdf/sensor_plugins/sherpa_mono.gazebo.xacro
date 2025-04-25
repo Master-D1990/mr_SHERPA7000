@@ -3,7 +3,7 @@
 <!-- This file contains plugins to simulate an Imu sensor attached to the robot. -->
 <!-- Documentation can be found at http://wiki.ros.org/hector_gazebo_plugins -->
 
-<robot name="smb" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="sherpa" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:macro name="mono_cam" params="base_link simulation">
     <!--                              Imu  Properties 				          	-->
     <xacro:property name="mono_base_link"		value="${base_link}"/>

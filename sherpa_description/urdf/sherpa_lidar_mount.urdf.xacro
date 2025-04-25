@@ -3,7 +3,7 @@
 <!-- This file contains plugins to simulate an Imu sensor attached to the robot. -->
 <!-- Documentation can be found at http://wiki.ros.org/hector_gazebo_plugins -->
 
-<robot name="smb" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="sherpa" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:macro name="lidar_mount" params="base_link">
     <!--                              Imu  Properties 				          	-->
     <xacro:property name="mount_base_link"		value="${base_link}"/>
@@ -13,7 +13,7 @@
     <link name="lidar_mount_link">
       <visual>
         <geometry>
-          <mesh filename="package://smb_description/urdf/new_payload/meshes/SMB_lidar_mount.dae"/>
+          <mesh filename="package://sherpa_description/urdf/new_payload/meshes/sherpa_lidar_mount.dae"/>
         </geometry>
       </visual>
       <inertial>
