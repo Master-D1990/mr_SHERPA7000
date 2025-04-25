@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="robot_description" default="robot_description"/>
+  <arg name="robot_namespace" default=""/>
+  
+  <!-- Add the missing arguments -->
+  <arg name="simulation" default="false"/>
+  <arg name="description_name" default="sherpa"/>
+  <arg name="description_file" default="$(find sherpa_description)/urdf/sherpa.urdf.xacro"/>
+  <arg name="wheel_joint_type" default="continuous"/>
+  
+  <!-- Load robot description from URDF/XACRO file to parameter server -->
+  <param name="$(arg robot_description)" command="$(find xacro)/xacro '$(arg description_file)'" />
+  
+  <!-- Publish robot state -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+    <param name="publish_frequency" value="50.0"/>
+    <remap from="robot_description" to="$(arg robot_description)"/>
+  </node>
+</launch>

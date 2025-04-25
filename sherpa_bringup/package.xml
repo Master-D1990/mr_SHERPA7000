@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>sherpa_bringup</name>
+  <version>0.1.0</version>
+  <description>Bringup package for Sherpa robot</description>
+  <maintainer email="davidmeister90@gmail.com">MasterD</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <depend>sherpa_description</depend>
+  <depend>sherpa_control</depend>
+  <depend>sherpa_gazebo</depend>
+  <depend>sherpa_msgs</depend>
+</package>

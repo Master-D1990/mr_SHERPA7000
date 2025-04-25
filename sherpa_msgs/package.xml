@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>sherpa_msgs</name>
+  <version>0.1.0</version>
+  <description>Messages package for Sherpa robot</description>
+  <maintainer email="davidmeister90@gmail.com">MasterD</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>message_runtime</depend>
+  <build_depend>message_generation</build_depend>
+</package>

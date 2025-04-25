@@ -1,31 +1,24 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(sherpa_gazebo)
+project(sherpa_bringup)
 
 find_package(catkin REQUIRED COMPONENTS
-  gazebo_ros
-  gazebo_ros_control
   sherpa_description
   sherpa_control
-  controller_manager
-  robot_state_publisher
-  xacro
+  sherpa_gazebo
 )
 
 catkin_package(
   CATKIN_DEPENDS 
-    gazebo_ros
-    gazebo_ros_control
     sherpa_description
     sherpa_control
-    controller_manager
-    robot_state_publisher
-    xacro
+    sherpa_gazebo
 )
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-install(DIRECTORY launch worlds
+# Installationsregeln für Launch-Dateien
+install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
