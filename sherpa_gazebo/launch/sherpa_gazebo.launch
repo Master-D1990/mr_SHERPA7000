@@ -45,6 +45,9 @@
   <!-- ROBOT ARGUMENTS -->
   <!-- Name of the robot description parameter -->
   <arg name="robot_description" default="robot_description"/>
+  
+  <!-- Load robot description with LiDAR enabled -->
+  <param name="$(arg robot_description)" command="$(find xacro)/xacro '$(find sherpa_description)/urdf/sherpa.urdf.xacro' simulation:=true lidar:=$(arg laser_enabled)" />
 
   <!-- Load Gazebo world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -63,36 +66,6 @@
     args="-param $(arg robot_description) -urdf -model $(arg robot_model_name) -x $(arg x)
       -y $(arg y) -z $(arg z) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"
     output="screen"/>
-    
-    
-    
-  <!-- Convert 3D velodyne scan to laser scan -->
-  <node name= "pointcloud_to_laserscan" pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" if="$(arg laser_enabled)">
-        <remap from="cloud_in" to="/rslidar_points"/>
-        <remap from="scan" to="/scan"/>
-        <rosparam>
-            target_frame: rslidar # Leave disabled to output scan in pointcloud frame
-            transform_tolerance: 0.01
-            min_height: $(arg laser_scan_min_height)
-            max_height: $(arg laser_scan_max_height)
-
-            angle_min: -3.14159 # -M_PI (geändert: voller 360°-Bereich statt nur 180°)
-            angle_max: 3.14159  # M_PI  (geändert: voller 360°-Bereich statt nur 180°)
-            angle_increment: 0.0087 # M_PI/360.0
-            scan_time: 0.03333
-            range_min: 0.45
-            range_max: 50.0
-            use_inf: true
-            inf_epsilon: 1.0
-
-            # Concurrency level, affects number of pointclouds queued for processing and number of threads used
-            # 0 : Detect number of cores
-            # 1 : Single threaded
-            # 2->inf : Parallelism level
-            concurrency_level: 1
-        </rosparam>
-  </node>
-
 
   <include file="$(find sherpa_control)/launch/control.launch">
     <arg name="simulation"      default="true"/>

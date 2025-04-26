@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!--
+  RPLiDAR-Integration für den Sherpa-Roboter in der Simulation
+  Diese Datei konfiguriert das RPLiDAR für die Verwendung mit dem Sherpa-Roboter
+  und stellt sicher, dass die richtigen Frames und Topics verwendet werden.
+-->
+<launch>
+  <!-- Konfiguration für die Simulation -->
+  <arg name="frame_id" default="rplidar_link" />
+  <arg name="topic_name" default="scan" />
+  
+  <!-- Nur in der Simulation erstellen wir einen statischen TF-Publisher,
+       um sicherzustellen, dass der rplidar_link-Frame als Kind des base_link-Frames existiert
+       und die korrekte Position hat. In der realen Hardware konfigurieren wir dies in der URDF. -->
+  <node pkg="tf" type="static_transform_publisher" name="rplidar_base_link" 
+        args="0 0 0.2 0 0 0 base_link $(arg frame_id) 100" />
+  
+  <!-- In einer echten Hardware-Konfiguration würden wir hier den RPLiDAR-Node starten:
+  <node name="rplidar_node" pkg="rplidar_ros" type="rplidarNode" output="screen">
+    <param name="serial_port" value="/dev/ttyUSB0"/>
+    <param name="serial_baudrate" value="115200"/>
+    <param name="frame_id" value="$(arg frame_id)"/>
+    <param name="inverted" value="false"/>
+    <param name="angle_compensate" value="true"/>
+  </node>
+  -->
+  
+  <!-- In der Simulation ist dies nicht notwendig, da der LaserScan
+       bereits durch das Gazebo-Plugin erzeugt wird. -->
+</launch>

@@ -3,7 +3,7 @@
   <name>sherpa_description</name>
   <version>0.1.1</version>
   <description>Super mega bot description</description>
-  <maintainer email="koen.kraemer@mavt.ethz.ch">Koen Kraemer</maintainer>
+  <maintainer email="davidmeister90@gmail.com">David Meister</maintainer>
   <license>BSD</license>
   <url type="website"> https://bitbucket.org/leggedrobotics/sherpa_common </url>
   <author email="koen.kraemer@mavt.ethz.ch">Koen Kraemer</author>
@@ -13,6 +13,4 @@
   <depend>urdf</depend>
   <depend>roslib</depend>
   <depend>hector_gazebo_plugins</depend>
-  <exec_depend>velodyne_description</exec_depend>
-  <exec_depend>velodyne_gazebo_plugins</exec_depend>
 </package>
