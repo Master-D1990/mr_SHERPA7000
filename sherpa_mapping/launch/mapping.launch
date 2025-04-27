@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<!--
+  Vereinfachte und robuste Mapping-Konfiguration für den Sherpa-Roboter mit Raupenantrieb
+  Kombiniert Kartierung (gmapping) und Lokalisierung (amcl) in einer Datei
+  Optimiert für den Einsatz mit unzuverlässiger Odometrie auf Raspberry Pi
+-->
+<launch>
+  <!-- Allgemeine Parameter -->
+  <arg name="scan_topic" default="/scan" doc="Topic des LaserScan-Inputs"/>
+  <arg name="base_frame" default="base_link" doc="Basis-Frame des Roboters"/>
+  <arg name="odom_frame" default="odom" doc="Odometrie-Frame des Roboters"/>
+  <arg name="map_frame" default="map" doc="Der globale Karten-Frame"/>
+  
+  <!-- Betriebsmodus -->
+  <arg name="mode" default="mapping" doc="Betriebsmodus: 'mapping' (Kartenerstellung) oder 'localization' (Lokalisierung in bestehender Karte)"/>
+  
+  <!-- Leistungsparameter -->
+  <arg name="particles" default="60" doc="Anzahl der Partikel für SLAM/Lokalisierung"/>
+  <arg name="use_rviz" default="false" doc="RViz mit spezieller Mapping-Konfiguration starten"/>
+  
+  <!-- Map-Parameter -->
+  <arg name="map_file" default="$(find sherpa_mapping)/maps/sherpa_map.yaml" doc="Pfad zur Kartendatei für Lokalisierung"/>
+  <arg name="save_map" default="false" doc="Karte am Ende automatisch speichern"/>
+  <arg name="map_name" default="sherpa_map" doc="Name für die gespeicherte Karte"/>
+
+  <!-- ========================= GMAPPING SLAM ========================= -->
+  <group if="$(eval mode == 'mapping')">
+    <!-- Gmapping SLAM Node starten für die Kartenerstellung -->
+    <node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" output="screen">
+      <!-- Grundlegende Frame-Konfiguration -->
+      <param name="base_frame" value="$(arg base_frame)"/>
+      <param name="odom_frame" value="$(arg odom_frame)"/>
+      <param name="map_frame" value="$(arg map_frame)"/>
+      
+      <!-- Scan-spezifische Parameter -->
+      <remap from="scan" to="$(arg scan_topic)"/>
+      <param name="minimumScore" value="30"/>
+      <param name="throttle_scans" value="1"/>
+      <param name="maxUrange" value="10.0"/>
+      <param name="maxRange" value="10.0"/>
+      
+      <!-- Update-Parameter für Raupenfahrzeug mit ungenauer Odometrie -->
+      <param name="linearUpdate" value="0.05"/>  <!-- Update nach 5cm linearer Bewegung -->
+      <param name="angularUpdate" value="0.1"/>  <!-- Update nach 5.7° Drehung -->
+      <param name="temporalUpdate" value="0.5"/> <!-- Update nach 0.5s Inaktivität -->
+      <param name="map_update_interval" value="1.5"/> <!-- Kartenaktualisierung alle 1.5s -->
+      
+      <!-- Odometrie-Fehlermodell: Geringes Vertrauen in Odometrie für Raupenfahrzeug -->
+      <param name="srr" value="0.4"/> <!-- Odometrie-Fehlermodell (linear/linear) -->
+      <param name="srt" value="0.6"/> <!-- Odometrie-Fehlermodell (linear/angular) -->
+      <param name="str" value="0.4"/> <!-- Odometrie-Fehlermodell (angular/linear) -->
+      <param name="stt" value="0.6"/> <!-- Odometrie-Fehlermodell (angular/angular) -->
+      
+      <!-- Optimierte Parameter für Balance aus Qualität und Performance -->
+      <param name="particles" value="$(arg particles)"/>
+      <param name="iterations" value="20"/>
+      <param name="lskip" value="1"/>
+      <param name="sigma" value="0.03"/>
+      <param name="kernelSize" value="1"/>
+      <param name="lstep" value="0.03"/>
+      <param name="astep" value="0.03"/>
+      <param name="resampleThreshold" value="0.25"/>
+      
+      <!-- Map-Größe und Auflösung -->
+      <param name="xmin" value="-25.0"/>
+      <param name="ymin" value="-25.0"/>
+      <param name="xmax" value="25.0"/>
+      <param name="ymax" value="25.0"/>
+      <param name="delta" value="0.05"/> <!-- 5cm Auflösung -->
+    </node>
+
+    <!-- Map-Server zum Speichern der Karte (wenn save_map=true) -->
+    <group if="$(arg save_map)">
+      <node name="map_saver" pkg="map_server" type="map_saver" args="-f $(find sherpa_mapping)/maps/$(arg map_name)" output="screen"/>
+    </group>
+  </group>
+
+  <!-- ========================= AMCL LOKALISIERUNG ========================= -->
+  <group if="$(eval mode == 'localization')">
+    <!-- Map-Server starten für die bestehende Karte -->
+    <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" output="screen">
+      <param name="frame_id" value="$(arg map_frame)"/>
+    </node>
+
+    <!-- AMCL Node für die Lokalisierung starten -->
+    <node name="amcl" pkg="amcl" type="amcl" output="screen">
+      <!-- Grundlegende Frame-Konfiguration -->
+      <param name="odom_frame_id" value="$(arg odom_frame)"/>
+      <param name="base_frame_id" value="$(arg base_frame)"/>
+      <param name="global_frame_id" value="$(arg map_frame)"/>
+      <remap from="scan" to="$(arg scan_topic)"/>
+      
+      <!-- Odometrie-Modell: Hohes Rauschen für Raupenfahrzeug -->
+      <param name="odom_model_type" value="diff"/>
+      <param name="odom_alpha1" value="0.8"/> <!-- Hohes Rotationsrauschen -->
+      <param name="odom_alpha2" value="0.8"/> <!-- Hohes Translationsrauschen -->
+      <param name="odom_alpha3" value="0.8"/> <!-- Hohes Translationsrauschen (rotationsabhängig) -->
+      <param name="odom_alpha4" value="0.8"/> <!-- Hohes Rotationsrauschen (translationsabhängig) -->
+      
+      <!-- Partikelfilter-Einstellungen für robuste Lokalisierung -->
+      <param name="kld_err" value="0.01"/>
+      <param name="kld_z" value="0.99"/>
+      <param name="min_particles" value="500"/>
+      <param name="max_particles" value="5000"/>
+      <param name="update_min_d" value="0.05"/> <!-- Update nach 5cm Bewegung -->
+      <param name="update_min_a" value="0.05"/> <!-- Update nach 2.9° Drehung -->
+      <param name="resample_interval" value="1"/>
+      <param name="transform_tolerance" value="0.2"/>
+      
+      <!-- LaserScan-Parameter für präzise Zuordnung -->
+      <param name="laser_max_beams" value="50"/>
+      <param name="laser_z_hit" value="0.95"/>
+      <param name="laser_z_short" value="0.1"/>
+      <param name="laser_z_max" value="0.05"/>
+      <param name="laser_z_rand" value="0.05"/>
+      <param name="laser_sigma_hit" value="0.1"/>
+      <param name="laser_likelihood_max_dist" value="4.0"/>
+      <param name="laser_model_type" value="likelihood_field"/>
+      
+      <!-- Recovery und Initialisierung -->
+      <param name="recovery_alpha_slow" value="0.001"/>
+      <param name="recovery_alpha_fast" value="0.1"/>
+      <param name="initial_cov_xx" value="1.0"/>
+      <param name="initial_cov_yy" value="1.0"/>
+      <param name="initial_cov_aa" value="0.5"/>
+    </node>
+  </group>
+
+  <!-- Starte RViz mit spezieller Mapping-Konfiguration, wenn gewünscht -->
+  <group if="$(arg use_rviz)">
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find sherpa_mapping)/rviz/mapping.rviz"/>
+  </group>
+</launch>
