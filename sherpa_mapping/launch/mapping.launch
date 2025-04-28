@@ -2,7 +2,7 @@
 <!--
   Vereinfachte und robuste Mapping-Konfiguration für den Sherpa-Roboter mit Raupenantrieb
   Kombiniert Kartierung (gmapping) und Lokalisierung (amcl) in einer Datei
-  Optimiert für den Einsatz mit unzuverlässiger Odometrie auf Raspberry Pi
+  Optimiert für schnelle Reaktionszeit und bessere Performance
 -->
 <launch>
   <!-- Allgemeine Parameter -->
@@ -15,7 +15,7 @@
   <arg name="mode" default="mapping" doc="Betriebsmodus: 'mapping' (Kartenerstellung) oder 'localization' (Lokalisierung in bestehender Karte)"/>
   
   <!-- Leistungsparameter -->
-  <arg name="particles" default="60" doc="Anzahl der Partikel für SLAM/Lokalisierung"/>
+  <arg name="particles" default="30" doc="Anzahl der Partikel für SLAM/Lokalisierung"/>
   <arg name="use_rviz" default="false" doc="RViz mit spezieller Mapping-Konfiguration starten"/>
   
   <!-- Map-Parameter -->
@@ -34,39 +34,46 @@
       
       <!-- Scan-spezifische Parameter -->
       <remap from="scan" to="$(arg scan_topic)"/>
-      <param name="minimumScore" value="30"/>
+      <param name="minimumScore" value="50"/>
       <param name="throttle_scans" value="1"/>
-      <param name="maxUrange" value="10.0"/>
-      <param name="maxRange" value="10.0"/>
+      <param name="maxUrange" value="8.0"/>
+      <param name="maxRange" value="8.0"/>
       
-      <!-- Update-Parameter für Raupenfahrzeug mit ungenauer Odometrie -->
-      <param name="linearUpdate" value="0.05"/>  <!-- Update nach 5cm linearer Bewegung -->
-      <param name="angularUpdate" value="0.1"/>  <!-- Update nach 5.7° Drehung -->
+      <!-- Update-Parameter für schnellere Reaktionsgeschwindigkeit -->
+      <param name="linearUpdate" value="0.2"/>  <!-- Update erst nach 20cm linearer Bewegung -->
+      <param name="angularUpdate" value="0.2"/>  <!-- Update erst nach 11.5° Drehung -->
       <param name="temporalUpdate" value="0.5"/> <!-- Update nach 0.5s Inaktivität -->
-      <param name="map_update_interval" value="1.5"/> <!-- Kartenaktualisierung alle 1.5s -->
+      <param name="map_update_interval" value="0.2"/> <!-- Kartenaktualisierung alle 0.2s -->
       
       <!-- Odometrie-Fehlermodell: Geringes Vertrauen in Odometrie für Raupenfahrzeug -->
-      <param name="srr" value="0.4"/> <!-- Odometrie-Fehlermodell (linear/linear) -->
-      <param name="srt" value="0.6"/> <!-- Odometrie-Fehlermodell (linear/angular) -->
-      <param name="str" value="0.4"/> <!-- Odometrie-Fehlermodell (angular/linear) -->
-      <param name="stt" value="0.6"/> <!-- Odometrie-Fehlermodell (angular/angular) -->
+      <param name="srr" value="0.2"/> <!-- Odometrie-Fehlermodell (linear/linear) -->
+      <param name="srt" value="0.3"/> <!-- Odometrie-Fehlermodell (linear/angular) -->
+      <param name="str" value="0.2"/> <!-- Odometrie-Fehlermodell (angular/linear) -->
+      <param name="stt" value="0.3"/> <!-- Odometrie-Fehlermodell (angular/angular) -->
       
-      <!-- Optimierte Parameter für Balance aus Qualität und Performance -->
+      <!-- Optimierte Parameter für schnellere Performance -->
       <param name="particles" value="$(arg particles)"/>
-      <param name="iterations" value="20"/>
-      <param name="lskip" value="1"/>
-      <param name="sigma" value="0.03"/>
+      <param name="iterations" value="5"/>
+      <param name="lskip" value="2"/>
+      <param name="sigma" value="0.05"/>
       <param name="kernelSize" value="1"/>
-      <param name="lstep" value="0.03"/>
-      <param name="astep" value="0.03"/>
-      <param name="resampleThreshold" value="0.25"/>
+      <param name="lstep" value="0.05"/>
+      <param name="astep" value="0.05"/>
+      <param name="resampleThreshold" value="0.5"/>
       
       <!-- Map-Größe und Auflösung -->
       <param name="xmin" value="-25.0"/>
       <param name="ymin" value="-25.0"/>
       <param name="xmax" value="25.0"/>
       <param name="ymax" value="25.0"/>
-      <param name="delta" value="0.05"/> <!-- 5cm Auflösung -->
+      <param name="delta" value="0.1"/> <!-- 10cm Auflösung statt 5cm -->
+      
+      <!-- Weitere Performance-Optimierungen -->
+      <param name="llsamplerange" value="0.05"/>
+      <param name="llsamplestep" value="0.05"/>
+      <param name="lasamplerange" value="0.05"/>
+      <param name="lasamplestep" value="0.05"/>
+      <param name="transform_publish_period" value="0.05"/>
     </node>
 
     <!-- Map-Server zum Speichern der Karte (wenn save_map=true) -->
@@ -92,29 +99,29 @@
       
       <!-- Odometrie-Modell: Hohes Rauschen für Raupenfahrzeug -->
       <param name="odom_model_type" value="diff"/>
-      <param name="odom_alpha1" value="0.8"/> <!-- Hohes Rotationsrauschen -->
-      <param name="odom_alpha2" value="0.8"/> <!-- Hohes Translationsrauschen -->
-      <param name="odom_alpha3" value="0.8"/> <!-- Hohes Translationsrauschen (rotationsabhängig) -->
-      <param name="odom_alpha4" value="0.8"/> <!-- Hohes Rotationsrauschen (translationsabhängig) -->
+      <param name="odom_alpha1" value="0.6"/> <!-- Reduziertes Rotationsrauschen -->
+      <param name="odom_alpha2" value="0.3"/> <!-- Reduziertes Translationsrauschen -->
+      <param name="odom_alpha3" value="0.6"/> <!-- Reduziertes Translationsrauschen (rotationsabhängig) -->
+      <param name="odom_alpha4" value="0.3"/> <!-- Reduziertes Rotationsrauschen (translationsabhängig) -->
       
-      <!-- Partikelfilter-Einstellungen für robuste Lokalisierung -->
-      <param name="kld_err" value="0.01"/>
-      <param name="kld_z" value="0.99"/>
-      <param name="min_particles" value="500"/>
-      <param name="max_particles" value="5000"/>
-      <param name="update_min_d" value="0.05"/> <!-- Update nach 5cm Bewegung -->
-      <param name="update_min_a" value="0.05"/> <!-- Update nach 2.9° Drehung -->
-      <param name="resample_interval" value="1"/>
-      <param name="transform_tolerance" value="0.2"/>
+      <!-- Partikelfilter-Einstellungen für schnellere Lokalisierung -->
+      <param name="kld_err" value="0.05"/>
+      <param name="kld_z" value="0.95"/>
+      <param name="min_particles" value="200"/>
+      <param name="max_particles" value="1000"/>
+      <param name="update_min_d" value="0.1"/> <!-- Update erst nach 10cm Bewegung -->
+      <param name="update_min_a" value="0.1"/> <!-- Update erst nach 5.7° Drehung -->
+      <param name="resample_interval" value="2"/>
+      <param name="transform_tolerance" value="0.1"/>
       
-      <!-- LaserScan-Parameter für präzise Zuordnung -->
-      <param name="laser_max_beams" value="50"/>
-      <param name="laser_z_hit" value="0.95"/>
+      <!-- LaserScan-Parameter für schnellere Verarbeitung -->
+      <param name="laser_max_beams" value="30"/>
+      <param name="laser_z_hit" value="0.9"/>
       <param name="laser_z_short" value="0.1"/>
       <param name="laser_z_max" value="0.05"/>
       <param name="laser_z_rand" value="0.05"/>
-      <param name="laser_sigma_hit" value="0.1"/>
-      <param name="laser_likelihood_max_dist" value="4.0"/>
+      <param name="laser_sigma_hit" value="0.2"/>
+      <param name="laser_likelihood_max_dist" value="2.0"/>
       <param name="laser_model_type" value="likelihood_field"/>
       
       <!-- Recovery und Initialisierung -->
