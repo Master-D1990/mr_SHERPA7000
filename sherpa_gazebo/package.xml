@@ -5,7 +5,7 @@
   <description>sherpa Gazebo plugins</description>
   <maintainer email="koen.kraemer@mavt.ethz.ch">Koen Kraemer</maintainer>
   <license>Proprietary</license>
-  <url type="website">https://bitbucket.org/leggedrobotics/sherpa_common</url>
+  <url type="website">https://bitbucket.org/leggedrobotics/sherpa</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 

@@ -5,7 +5,7 @@
   <description>Super mega bot description</description>
   <maintainer email="davidmeister90@gmail.com">David Meister</maintainer>
   <license>BSD</license>
-  <url type="website"> https://bitbucket.org/leggedrobotics/sherpa_common </url>
+  <url type="website"> https://bitbucket.org/leggedrobotics/sherpa </url>
   <author email="koen.kraemer@mavt.ethz.ch">Koen Kraemer</author>
   <buildtool_depend>catkin</buildtool_depend>
 

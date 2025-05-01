@@ -12,6 +12,8 @@
 9. [Konfliktlösung](#konfliktlösung)
 10. [Best Practices](#best-practices)
 11. [Häufige Fehler und Lösungen](#häufige-fehler-und-lösungen)
+12. [Sherpa-spezifische Hinweise](#sherpa-spezifische-hinweise)
+13. [ROS Troubleshooting](#ros-troubleshooting)
 
 ## Einführung
 
@@ -158,6 +160,19 @@ git status
 git branch
 # usw.
 ```
+
+### Sherpa-spezifische Hinweise
+
+- **Wichtige Dateien und Ordner**: Der `sherpa`-Ordner enthält die Hauptkomponenten des Projekts, wie z. B. `sherpa_bringup`, `sherpa_control`, und `sherpa_description`. Änderungen an diesen Ordnern sollten mit besonderer Vorsicht vorgenommen werden.
+- **Vollständige Simulation starten**: Die vollständige Simulation des Sherpa-Roboters wird über den Ordner `sherpa_bringup` gestartet. Beispiel:
+  ```bash
+  roslaunch sherpa_bringup sherpa_simulation.launch
+  ```
+  Dieser Befehl startet alle notwendigen Komponenten, einschließlich der Gazebo-Simulation, der Steuerung und der Sensoren.
+- **ROS-Umgebung vorbereiten**: Vor dem Starten von ROS-Komponenten sicherstellen, dass die Umgebung korrekt eingerichtet ist:
+  ```bash
+  source ~/catkin_ws/devel/setup.bash
+  ```
 
 ## Grundlegende Git-Operationen
 
@@ -359,5 +374,59 @@ git reset --hard HEAD~1    # Änderungen verwerfen
 ```bash
 git checkout -- <dateiname>
 ```
+
+## Sherpa-spezifische Hinweise
+
+- **Wichtige Dateien und Ordner**: Der `sherpa`-Ordner enthält die Hauptkomponenten des Projekts, wie z. B. `sherpa_bringup`, `sherpa_control`, und `sherpa_description`. Änderungen an diesen Ordnern sollten mit besonderer Vorsicht vorgenommen werden.
+- **Vollständige Simulation starten**: Die vollständige Simulation des Sherpa-Roboters wird über den Ordner `sherpa_bringup` gestartet. Beispiel:
+  ```bash
+  roslaunch sherpa_bringup sherpa_simulation.launch
+  ```
+  Dieser Befehl startet alle notwendigen Komponenten, einschließlich der Gazebo-Simulation, der Steuerung und der Sensoren.
+- **ROS-Umgebung vorbereiten**: Vor dem Starten von ROS-Komponenten sicherstellen, dass die Umgebung korrekt eingerichtet ist:
+  ```bash
+  source ~/catkin_ws/devel/setup.bash
+  ```
+
+## ROS Troubleshooting
+
+### Häufige Probleme und Lösungen
+
+1. **`command not found: roslaunch`**
+   - Ursache: ROS-Umgebung nicht geladen.
+   - Lösung:
+     ```bash
+     source ~/catkin_ws/devel/setup.bash
+     ```
+
+2. **`[ERROR] [ROS_MASTER_URI]`**
+   - Ursache: ROS-Master nicht gestartet.
+   - Lösung:
+     ```bash
+     roscore
+     ```
+
+3. **`Package not found`**
+   - Ursache: Paket wurde nicht gebaut oder ist nicht im Workspace.
+   - Lösung:
+     ```bash
+     catkin_make
+     source ~/catkin_ws/devel/setup.bash
+     ```
+
+4. **`Gazebo startet nicht`**
+   - Ursache: Fehlende Abhängigkeiten oder falsche Konfiguration.
+   - Lösung:
+     ```bash
+     rosdep install --from-paths src --ignore-src -r -y
+     ```
+
+### Debugging-Tipps
+
+- **Logs prüfen**: ROS-Logs befinden sich im Ordner `~/.ros/log`.
+- **Simulation testen**: Gazebo-Simulation starten, um Änderungen zu validieren:
+  ```bash
+  roslaunch sherpa_gazebo sherpa_world.launch
+  ```
 
 ---
