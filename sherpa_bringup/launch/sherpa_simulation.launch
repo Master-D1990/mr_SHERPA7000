@@ -4,20 +4,20 @@
   Diese Datei startet die gesamte Simulationsumgebung einschließlich:
   - Gazebo mit Sherpa-Roboter und LiDAR
   - Tastatur-Teleop-Steuerung
-  - Optional: OctoMap-Visualisierung für 3D-Umgebungskartierung
+  - 3D Voxel Mapping mit OctoMap-Visualisierung
 -->
 <launch>
   <!-- Allgemeine Argumente -->
   <arg name="debug" default="false" doc="Gazebo im Debug-Modus starten"/>
   <arg name="gui" default="true" doc="Gazebo GUI anzeigen"/>
   <arg name="use_rviz" default="true" doc="RViz starten für die Roboter-Visualisierung"/>
-  <arg name="enable_octomap" default="false" doc="OctoMap-Visualisierung aktivieren"/>
+  <arg name="enable_3d_mapping" default="true" doc="3D Voxel Mapping aktivieren"/>
   <!-- Deaktiviere den zweiten LiDAR, um nur den RPLiDAR zu verwenden -->
   <arg name="laser_enabled" default="false" doc="Zweiten LiDAR (Velodyne) aktivieren/deaktivieren"/>
   <!-- RPLiDAR Parameter -->
   <arg name="rplidar_enabled" default="true" doc="RPLiDAR in der Simulation aktivieren"/>
   <!-- Mapping-Parameter -->
-  <arg name="enable_mapping" default="true" doc="Mapping-Funktionalität aktivieren"/>
+  <arg name="enable_mapping" default="true" doc="2D-Mapping-Funktionalität aktivieren"/>
   <arg name="mapping_type" default="gmapping" doc="Mapping-Typ: 'gmapping', 'hector' oder 'cartographer'"/>
   <arg name="localization_only" default="false" doc="True für reine Lokalisierung in einer bestehenden Karte"/>
   
@@ -29,9 +29,20 @@
   <arg name="pitch" default="0.0"/>
   <arg name="yaw" default="0.0"/>
   
-  <!-- OctoMap-Parameter -->
-  <arg name="octomap_resolution" default="0.1" doc="Auflösung der OctoMap in Metern"/>
-  <arg name="sensor_range" default="5.0" doc="Maximale Sensorreichweite für OctoMap"/>
+  <!-- 3D Voxel Mapper Parameter -->
+  <arg name="voxel_size" default="0.1" doc="Auflösung der Voxel in Metern"/>
+  <arg name="max_range" default="10.0" doc="Maximale Reichweite für Punkte in Metern"/>
+  <arg name="min_height" default="-0.1" doc="Minimale Höhe für 3D-Punkte in Metern"/>
+  <arg name="max_height" default="0.5" doc="Maximale Höhe für 3D-Punkte in Metern"/>
+  <arg name="sensor_height" default="0.2" doc="Höhe des Sensors über dem Boden"/>
+  <arg name="use_2d_map_for_localization" default="true" doc="2D-Karte für Lokalisierungsqualitätsprüfung verwenden"/>
+  <arg name="localization_threshold" default="0.95" doc="Schwellwert für die Lokalisierungsqualität"/>
+  <arg name="single_layer_only" default="true" doc="Nur eine einzige Schicht Voxel erzeugen"/>
+  <arg name="update_rate" default="10.0" doc="Aktualisierungsrate der Voxelkarte in Hz"/>
+  
+  <!-- Neue Synchronisations-Parameter -->
+  <arg name="use_synchronization" default="true" doc="Synchronisation zwischen Scans und TF aktivieren"/>
+  <arg name="max_sync_delay" default="0.1" doc="Maximale erlaubte Verzögerung für Synchronisation (s)"/>
   
   <!-- 1. Starte Gazebo mit dem Sherpa-Roboter -->
   <include file="$(find sherpa_gazebo)/launch/sherpa_gazebo.launch">
@@ -55,44 +66,7 @@
   <!-- 2. Starte Tastatur-Teleop-Steuerung -->
   <include file="$(find sherpa_teleop)/launch/sherpa_teleop.launch" />
 
-  <!-- 3. Starte RViz für die Roboter-Visualisierung (wenn aktiviert) -->
-  <group if="$(arg use_rviz)">
-    <!-- Standard Visualisierung (sherpa oder unsere neue Konfiguration) -->
-    <group unless="$(arg enable_octomap)">
-      <!-- Verwende unsere neue angepasste RPLiDAR-Visualisierung -->
-      <node pkg="rviz" type="rviz" name="rviz" 
-            args="-d $(find sherpa_bringup)/rviz/sherpa_simulation.rviz"/>
-    </group>
-  </group>
-
-  <!-- 4. Starte OctoMap-Visualisierung (wenn aktiviert) -->
-  <group if="$(arg enable_octomap)">
-    <!-- Start OctoMap Server konfiguriert für LaserScan-Eingabe -->
-    <node pkg="octomap_server" type="octomap_server_node" name="octomap_server" output="screen">
-      <param name="resolution" value="$(arg octomap_resolution)"/>
-      <param name="frame_id" value="map"/>
-      <param name="sensor_model/max_range" value="$(arg sensor_range)"/>
-      
-      <!-- LaserScan-spezifische Konfiguration -->
-      <param name="height_map" value="false"/>
-      <param name="colored_map" value="false"/>
-      <param name="filter_ground" value="false"/>
-      <param name="ground_filter/distance" value="0.04"/>
-      <param name="ground_filter/angle" value="0.15"/>
-      <param name="ground_filter/plane_distance" value="0.07"/>
-      
-      <!-- Eingabe: LaserScan-Daten vom LiDAR -->
-      <remap from="scan" to="/scan"/>
-      
-      <!-- Basis-Frame für die Transformation -->
-      <param name="base_frame_id" value="base_link"/>
-    </node>
-    
-    <!-- Starte RViz mit OctoMap-Konfiguration -->
-    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find sherpa_description)/rviz/sherpa_octomap.rviz"/>
-  </group>
-  
-  <!-- 5. Starte das Mapping mit dem neuen sherpa_mapping-Paket -->
+  <!-- 3. Starte das 2D-Mapping mit dem sherpa_mapping-Paket -->
   <group if="$(arg enable_mapping)">
     <include file="$(find sherpa_mapping)/launch/mapping.launch">
       <!-- Konfiguration für das Mapping -->
@@ -101,5 +75,84 @@
       <arg name="use_rviz" value="false"/> <!-- Verwende bereits laufendes RViz -->
       <arg name="particles" value="60"/> <!-- Optimiert für Raupenfahrzeug -->
     </include>
+  </group>
+
+  <!-- 4. Starte 3D Voxel Mapping (wenn aktiviert) -->
+  <group if="$(arg enable_3d_mapping)">
+    <!-- 3D Voxel Mapper starten -->
+    <node pkg="sherpa_mapping" type="voxel_3d_mapper.py" name="voxel_3d_mapper" output="screen">
+      <param name="scan_topic" value="/scan"/> <!-- RPLiDAR-Topic aus der Simulation -->
+      <param name="cloud_out_topic" value="/cloud_in"/> <!-- Explizit den Topic-Namen festlegen -->
+      <param name="base_frame" value="base_link"/>
+      <param name="map_frame" value="map"/>
+      <param name="odom_frame" value="odom"/>
+      <param name="voxel_size" value="$(arg voxel_size)"/>
+      <param name="max_range" value="$(arg max_range)"/>
+      <param name="sensor_height" value="$(arg sensor_height)"/>
+      <param name="use_2d_map_for_localization" value="$(arg use_2d_map_for_localization)"/>
+      <param name="localization_threshold" value="$(arg localization_threshold)"/>
+      <param name="single_layer_only" value="$(arg single_layer_only)"/>
+      
+      <!-- Neue Synchronisations-Parameter -->
+      <param name="use_synchronization" value="$(arg use_synchronization)"/>
+      <param name="max_sync_delay" value="$(arg max_sync_delay)"/>
+    </node>
+
+    <!-- Octomap-Server für die 3D-Kartierung -->
+    <node pkg="octomap_server" type="octomap_server_node" name="octomap_server" output="screen">
+      <!-- Grundlegende Octomap-Parameter -->
+      <param name="resolution" value="$(arg voxel_size)" />
+      <param name="frame_id" value="map" />
+      <param name="base_frame_id" value="base_link" />
+      
+      <!-- Sensor-Modell-Parameter -->
+      <param name="sensor_model/max_range" value="$(arg max_range)" />
+      <param name="sensor_model/hit" value="0.8" />
+      <param name="sensor_model/miss" value="0.2" /> <!-- Reduziert für weniger Entfernung von Voxeln -->
+      <param name="sensor_model/min" value="0.12" />
+      <param name="sensor_model/max" value="0.97" />
+      
+      <!-- Octomap-Visualisierung -->
+      <param name="color/r" value="0.0" />
+      <param name="color/g" value="0.6" />
+      <param name="color/b" value="0.8" />
+      <param name="color/a" value="1.0" />
+      
+      <!-- Neues Filterverhalten für dünne Hindernisse -->
+      <param name="filter_ground" value="false" /> <!-- Kein Bodenfilter für die einzelne Schicht -->
+      <param name="ground_filter/distance" value="0.02" />
+      <param name="ground_filter/angle" value="0.15" />
+      <param name="ground_filter/plane_distance" value="0.05" />
+      
+      <!-- Höhenbegrenzung für bessere Übereinstimmung mit dem LIDAR -->
+      <param name="occupancy_min_z" value="$(arg min_height)" /> <!-- Minimale Z-Höhe für besetzte Zellen -->
+      <param name="occupancy_max_z" value="$(arg max_height)" /> <!-- Maximale Z-Höhe für besetzte Zellen -->
+      
+      <!-- Publizierungs-Einstellungen -->
+      <param name="publish_free_space" value="false" /> <!-- Keine freien Zellen veröffentlichen für klarere Darstellung -->
+      <param name="latch" value="true" /> <!-- Letzte Nachricht beibehalten -->
+      
+      <!-- Wichtig: Konfiguriere den Input-Topic auf /cloud_in, den unser 3D Voxel Mapper verwendet -->
+      <remap from="cloud_in" to="/cloud_in" />
+    </node>
+    
+    <!-- Speicher-Parameter für die Octomap -->
+    <param name="octomap_binary" value="$(find sherpa_mapping)/maps/sherpa_3d_sim_map.bt" />
+  </group>
+  
+  <!-- 5. Starte RViz mit der passenden Konfiguration -->
+  <group if="$(arg use_rviz)">
+    <!-- Wähle die passende RViz-Konfiguration basierend auf den aktivierten Features -->
+    <group if="$(arg enable_3d_mapping)">
+      <!-- 3D Mapping RViz Config -->
+      <node pkg="rviz" type="rviz" name="rviz" 
+            args="-d $(find sherpa_mapping)/rviz/3d_mapping.rviz"/>
+    </group>
+    
+    <group unless="$(arg enable_3d_mapping)">
+      <!-- Standard Sherpa RViz Config -->
+      <node pkg="rviz" type="rviz" name="rviz" 
+            args="-d $(find sherpa_bringup)/rviz/sherpa_simulation.rviz"/>
+    </group>
   </group>
 </launch>
