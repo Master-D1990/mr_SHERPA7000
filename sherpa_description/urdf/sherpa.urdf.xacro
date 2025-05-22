@@ -40,7 +40,7 @@
                 </geometry>
             </collision>
             <visual>
-                <origin xyz="0 0 0" rpy="-${0.5*PI} 0 ${roller_angle}" />
+                <origin xyz="0 0 0" rpy="0 -${0.5*PI} 0" />
                 <geometry>
                     <mesh filename="${wheel_mesh}" scale="0.001 0.001 0.001"/>
                 </geometry>
