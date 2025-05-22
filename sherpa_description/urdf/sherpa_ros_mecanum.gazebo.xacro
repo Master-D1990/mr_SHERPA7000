@@ -1,30 +1,37 @@
 <?xml version="1.0"?>
 
-<!-- This file contains the Gazebo controller interface. -->
+<!-- This file contains the Gazebo controller interface for mecanum wheels. -->
 <robot name="sherpa" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:macro name="sherpa_ros_skid_steer_plugin" params="description_name
+  <xacro:macro name="sherpa_mecanum_drive_plugin" params="description_name
                                                         broadcast_tf
                                                         robot_namespace">
 
   <xacro:arg name="base_cmd_topic_name" default="cmd_vel"/>
 
     <gazebo>
-      <!-- Changed from skid_steer_drive to mecanum_drive -->
-      <plugin name="gazebo_ros_control" filename="libgazebo_ros_planar_move.so">
+      <plugin name="mecanum_controller" filename="libgazebo_ros_planar_move.so">
         <robotNamespace>${robot_namespace}</robotNamespace>
         <commandTopic>$(arg base_cmd_topic_name)</commandTopic>
         <odometryTopic>odom</odometryTopic>
         <odometryFrame>odom</odometryFrame>
         <odometryRate>20.0</odometryRate>
         <robotBaseFrame>${base_link_name}</robotBaseFrame>
-        <broadcastTF>${broadcast_tf}</broadcastTF>
         <publishOdomTF>${broadcast_tf}</publishOdomTF>
         <publishWheelTF>false</publishWheelTF>
         <updateRate>100</updateRate>
         <covariance_x>0.1</covariance_x>
         <covariance_y>0.01</covariance_y>
         <covariance_yaw>0.1</covariance_yaw>
+      </plugin>
+    </gazebo>
+
+    <!-- Add joint state controller -->
+    <gazebo>
+      <plugin name="joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
+        <jointName>LF_WHEEL_JOINT, RF_WHEEL_JOINT, LH_WHEEL_JOINT, RH_WHEEL_JOINT</jointName>
+        <updateRate>50.0</updateRate>
+        <robotNamespace>${robot_namespace}</robotNamespace>
       </plugin>
     </gazebo>
 

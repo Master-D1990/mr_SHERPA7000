@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <asset>
+    <contributor>
+      <author>GitHub Copilot</author>
+      <authoring_tool>Blender</authoring_tool>
+    </contributor>
+    <created>2025-05-22T10:00:00</created>
+    <modified>2025-05-22T10:00:00</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_effects>
+    <effect id="Material-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <lambert>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <diffuse>
+              <color sid="diffuse">0.2 0.2 0.2 1</color>
+            </diffuse>
+          </lambert>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="Roller-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <lambert>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <diffuse>
+              <color sid="diffuse">0.5 0.5 0.5 1</color>
+            </diffuse>
+          </lambert>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_materials>
+    <material id="Material-material" name="Material">
+      <instance_effect url="#Material-effect"/>
+    </material>
+    <material id="Roller-material" name="Roller">
+      <instance_effect url="#Roller-effect"/>
+    </material>
+  </library_materials>
+  <library_geometries>
+    <geometry id="Cylinder-mesh" name="Cylinder">
+      <mesh>
+        <source id="Cylinder-mesh-positions">
+          <float_array id="Cylinder-mesh-positions-array" count="48">0 0.02 0 0.02 0 0 0 -0.02 0 -0.02 0 0 0 0.02 0.2 0.02 0 0.2 0 -0.02 0.2 -0.02 0 0.2 0.014142 0.014142 0 0.014142 -0.014142 0 -0.014142 -0.014142 0 -0.014142 0.014142 0 0.014142 0.014142 0.2 0.014142 -0.014142 0.2 -0.014142 -0.014142 0.2 -0.014142 0.014142 0.2</float_array>
+          <technique_common>
+            <accessor source="#Cylinder-mesh-positions-array" count="16" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Cylinder-mesh-normals">
+          <float_array id="Cylinder-mesh-normals-array" count="48">0 1 0 1 0 0 0 -1 0 -1 0 0 0 0 1 0 0 -1 0.7071068 0.7071068 0 0.7071068 -0.7071068 0 -0.7071068 -0.7071068 0 -0.7071068 0.7071068 0 0.7071068 0.7071068 0 0.7071068 -0.7071068 0 -0.7071068 -0.7071068 0 -0.7071068 0.7071068 0 0 0 1 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#Cylinder-mesh-normals-array" count="16" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Cylinder-mesh-vertices">
+          <input semantic="POSITION" source="#Cylinder-mesh-positions"/>
+        </vertices>
+        <triangles material="Material-material" count="28">
+          <input semantic="VERTEX" source="#Cylinder-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Cylinder-mesh-normals" offset="1"/>
+          <p>0 0 4 0 8 10 8 10 4 0 12 10 1 1 5 1 9 11 9 11 5 1 13 11 2 2 6 2 10 12 10 12 6 2 14 12 3 3 7 3 11 13 11 13 7 3 15 13 4 4 5 4 12 14 12 14 5 4 13 14 6 4 7 4 14 14 14 14 7 4 15 14 0 5 1 5 8 15 8 15 1 5 9 15 1 5 2 5 9 15 9 15 2 5 10 15 2 5 3 5 10 15 10 15 3 5 11 15 3 5 0 5 11 15 11 15 0 5 8 15 8 6 12 6 9 6 9 6 12 6 13 6 9 7 13 7 10 7 10 7 13 7 14 7 10 8 14 8 11 8 11 8 14 8 15 8 11 9 15 9 8 9 8 9 15 9 12 9</p>
+        </triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="Cylinder" name="Cylinder" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_geometry url="#Cylinder-mesh" name="Cylinder">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="Material-material" target="#Material-material"/>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>

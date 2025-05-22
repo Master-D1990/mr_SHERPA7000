@@ -67,7 +67,8 @@
       -y $(arg y) -z $(arg z) -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"
     output="screen"/>
 
-  <include file="$(find sherpa_control)/launch/control.launch">
+  <!-- Changed from standard control to mecanum control -->
+  <include file="$(find sherpa_control)/launch/mecanum_control.launch">
     <arg name="simulation"      default="true"/>
     <arg name="robot_namespace"     default="$(arg robot_namespace)"/>
     <arg name="robot_description"   default="$(arg robot_description)"/>

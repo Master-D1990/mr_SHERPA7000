@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="sherpa">
 
   <!-- Arguments -->
-  <xacro:arg name="wheel_joint_type"          default="fixed"/> <!-- continuous for gazebo -->
+  <xacro:arg name="wheel_joint_type"          default="continuous"/> <!-- Changed from 'fixed' to 'continuous' for mecanum wheels -->
   <xacro:arg name="simulation"                default="false"/>
   <xacro:arg name="lidar"                     default="true"/>
   <xacro:arg name="robot_namespace"           default=""/>
@@ -17,11 +17,11 @@
   <xacro:sherpa wheel_joint_type="$(arg wheel_joint_type)" simulation="$(arg simulation)"/>
   
 
-  <!-- Handle gazebo plugins -->
-  <xacro:include filename="$(find sherpa_description)/urdf/sherpa_ros_skid_steer.gazebo.xacro"/>
+  <!-- Handle gazebo plugins - Changed from skid steer to mecanum drive -->
+  <xacro:include filename="$(find sherpa_description)/urdf/sherpa_ros_mecanum.gazebo.xacro"/>
 
  
-  <xacro:sherpa_ros_skid_steer_plugin description_name="$(arg description_name_xacro)"
+  <xacro:sherpa_mecanum_drive_plugin description_name="$(arg description_name_xacro)"
       broadcast_tf="$(arg publish_tf)" robot_namespace="$(arg robot_namespace)"/>
  
 

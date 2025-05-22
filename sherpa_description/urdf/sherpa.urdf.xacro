@@ -10,6 +10,64 @@
     <xacro:property name="PI" value="3.1415926535897931"/>
 
     <!-- Model macros -->
+    <xacro:macro name="mecanum_wheel" params="prefix X Y wheel_joint_type friction_coeff:=0.2 transmission_reduction:=1 roller_angle:=0" >
+        <joint name="${prefix}_WHEEL_JOINT" type="${wheel_joint_type}">
+            <parent link="${base_link_name}"/>
+            <child link="${prefix}_WHEEL"/>
+            <origin xyz="${X} ${Y} ${wheelHeight - chassisHeight/2.0}" rpy="-${0.5*PI} 0 0" />
+            <axis xyz="0 0 1" rpy="0 0 0" />
+            <dynamics damping="1.0" friction="0.0"/>
+            <limit effort="1" velocity="1"/>
+            <joint_properties damping="0.2" friction="0.2"/>
+        </joint>
+
+        <link name="${prefix}_WHEEL">
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <cylinder length="${wheelWidth/10}" radius="${wheelRadius}"/>
+                </geometry>
+            </collision>
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 ${roller_angle}" />
+                <geometry>
+                    <!-- Using a mesh for better visualization of mecanum wheel -->
+                    <mesh filename="package://sherpa_description/meshes/mecanum_wheel.dae" scale="${wheelRadius*5} ${wheelRadius*5} ${wheelRadius*5}"/>
+                </geometry>
+                <material name="dark_grey"/>
+            </visual>
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <mass value="${wheelMass}"/>
+                <xacro:cylinder_inertia m="${wheelMass}" r="${wheelRadius}" h="${wheelWidth}"/>
+            </inertial>
+        </link>
+
+        <gazebo reference="${prefix}_WHEEL">
+            <!-- Special settings for mecanum wheels -->
+            <mu1 value="${friction_coeff}"/>
+            <mu2 value="${friction_coeff}"/>
+            <!-- Using the roller angle to set the friction direction -->
+            <fdir1 value="0 ${sin(roller_angle)} ${cos(roller_angle)}"/>
+            <kp>10000000.0</kp>
+            <kd>1.0</kd>
+            <minDepth>0.005</minDepth>
+            <maxVel>100.0</maxVel>
+            <material>Gazebo/DarkGrey</material>
+        </gazebo>
+
+        <transmission name="${prefix}_WHEEL_TRANS" type="SimpleTransmission">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="${prefix}_WHEEL_JOINT">
+                <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="${prefix}_ACTUATOR">
+                <mechanicalReduction>${transmission_reduction}</mechanicalReduction>
+            </actuator>
+        </transmission>
+    </xacro:macro>
+    
+    <!-- Keeping the original wheel macro for backward compatibility -->
     <xacro:macro name="wheel" params="prefix X Y wheel_joint_type friction_coeff:=0.2 transmission_reduction:=1" >
         <joint name="${prefix}_WHEEL_JOINT" type="${wheel_joint_type}">
             <parent link="${base_link_name}"/>
@@ -61,8 +119,6 @@
                 <mechanicalReduction>${transmission_reduction}</mechanicalReduction>
             </actuator>
         </transmission>
-
-
     </xacro:macro>
 
     <xacro:macro name="chassis">
@@ -140,24 +196,33 @@
     <xacro:macro name="sherpa" params="wheel_joint_type:=continuous lidar:=true simulation:=true">
         <xacro:chassis/>
 
-        <xacro:wheel prefix="LF" X="${frontWheelX}"
+        <!-- Front left wheel - 45 degree roller angle -->
+        <xacro:mecanum_wheel prefix="LF" X="${frontWheelX}"
             Y="${chassisWidth/2+wheelClearance+wheelWidth/2}"
             wheel_joint_type="${wheel_joint_type}"
-            friction_coeff="0.5" />
+            friction_coeff="0.5"
+            roller_angle="-0.785" /> <!-- -45 degrees in radians -->
 
-        <xacro:wheel prefix="RF" X="${frontWheelX}"
+        <!-- Front right wheel - -45 degree roller angle -->
+        <xacro:mecanum_wheel prefix="RF" X="${frontWheelX}"
             Y="${-chassisWidth/2-wheelClearance-wheelWidth/2}"
             wheel_joint_type="${wheel_joint_type}"
-            friction_coeff="0.5"/>
+            friction_coeff="0.5"
+            roller_angle="0.785" /> <!-- 45 degrees in radians -->
 
-        <xacro:wheel prefix="LH" X="${backWheelX}"
+        <!-- Rear left wheel - 45 degree roller angle, but opposite to front right -->
+        <xacro:mecanum_wheel prefix="LH" X="${backWheelX}"
             Y="${chassisWidth/2+wheelClearance+wheelWidth/2}"
-	    wheel_joint_type="${wheel_joint_type}"
-        friction_coeff="0.0" />
+            wheel_joint_type="${wheel_joint_type}"
+            friction_coeff="0.5"
+            roller_angle="0.785" /> <!-- 45 degrees in radians -->
 
-        <xacro:wheel prefix="RH" X="${backWheelX}"
+        <!-- Rear right wheel - -45 degree roller angle, but opposite to front left -->
+        <xacro:mecanum_wheel prefix="RH" X="${backWheelX}"
             Y="${-chassisWidth/2-wheelClearance-wheelWidth/2}"
-            wheel_joint_type="${wheel_joint_type}" />
+            wheel_joint_type="${wheel_joint_type}" 
+            friction_coeff="0.5"
+            roller_angle="-0.785" /> <!-- -45 degrees in radians -->
 
         <xacro:IMU base_link="${base_link_name}" simulation="${simulation}"/>
         <xacro:RPLIDAR base_link="${base_link_name}" simulation="${simulation}"/>
