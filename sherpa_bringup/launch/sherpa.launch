@@ -1,70 +1,52 @@
 <?xml version="1.0"?>
 <!-- 
-  Haupt-Launch-Datei für den SHERPA-Roboter in der realen Welt
-  Diese Datei startet alle erforderlichen Komponenten für den realen Betrieb:
-  - Roboter-Beschreibung und State Publisher
-  - Controller
-  - Sensoren und Treiber
+  Haupt-Launch-Datei für den realen SHERPA-Roboter
+  Diese Datei startet alle notwendigen Komponenten für den realen Betrieb:
+  - RPLiDAR A1M8 Hardware-Treiber
+  - Motorsteuerung mit PCA9685 und TB6612FNG
   - Tastatur-Teleop-Steuerung
-  - Optional: OctoMap für 3D-Mapping
+  - 2D-Mapping mit gmapping (optional)
 -->
 <launch>
-  <!-- Allgemeine Argumente -->
-  <arg name="model_xacro" default="$(find sherpa_description)/urdf/sherpa.urdf.xacro"/>
-  <arg name="lidar_enabled" default="true" doc="2D-LiDAR aktivieren"/>
-  <arg name="enable_octomap" default="false" doc="OctoMap-Mapping aktivieren"/>
-  <arg name="use_rviz" default="true" doc="RViz für die Visualisierung starten"/>
-
-  <!-- OctoMap-Parameter -->
-  <arg name="octomap_resolution" default="0.1" doc="Auflösung der OctoMap in Metern"/>
-  <arg name="sensor_range" default="5.0" doc="Maximale Sensorreichweite für OctoMap"/>
-
-  <!-- 1. Lade Roboter-Beschreibung -->
-  <param name="robot_description" command="$(find xacro)/xacro $(arg model_xacro)" />
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
-
-  <!-- 2. Lade Controller -->
-  <include file="$(find sherpa_control)/launch/control.launch"/>
-
-  <!-- 3. Starte LiDAR-Treiber wenn aktiviert -->
-  <group if="$(arg lidar_enabled)">
-    <include file="$(find sherpa_perception)/rplidar_ros/launch/sherpa_rplidar.launch"/>
+  <!-- Allgemeine Parameter -->
+  <arg name="use_rviz" default="false" doc="RViz auf dem Pi starten (nur mit Desktop-Umgebung)"/>
+  
+  <!-- RPLiDAR Parameter -->
+  <arg name="rplidar_port" default="/dev/ttyUSB0" doc="Serieller Port des RPLiDAR"/>
+  <arg name="rplidar_baudrate" default="115200" doc="Baudrate für A1/A2-Modelle"/>
+  <arg name="rplidar_frame_id" default="rplidar_link" doc="TF-Frame für den RPLiDAR"/>
+  
+  <!-- Mapping-Parameter -->
+  <arg name="enable_mapping" default="true" doc="2D-Mapping-Funktionalität aktivieren"/>
+  <arg name="mapping_type" default="gmapping" doc="Mapping-Typ: 'gmapping', 'hector' oder 'cartographer'"/>
+  <arg name="localization_only" default="false" doc="True für reine Lokalisierung in einer bestehenden Karte"/>
+  
+  <!-- 1. Starte RPLiDAR-Hardware-Treiber -->
+  <include file="$(find rplidar_ros)/launch/sherpa_rplidar.launch">
+    <arg name="serial_port" value="$(arg rplidar_port)"/>
+    <arg name="serial_baudrate" value="$(arg rplidar_baudrate)"/>
+    <arg name="frame_id" value="$(arg rplidar_frame_id)"/>
+  </include>
+  
+  <!-- 2. Starte Motorsteuerung -->
+  <include file="$(find sherpa_actuation)/launch/actuation.launch" />
+  
+  <!-- 3. Starte Tastatur-Teleop-Steuerung -->
+  <include file="$(find sherpa_teleop)/launch/sherpa_teleop.launch" />
+  
+  <!-- 4. Starte das 2D-Mapping mit dem sherpa_mapping-Paket -->
+  <group if="$(arg enable_mapping)">
+    <include file="$(find sherpa_mapping)/launch/mapping.launch">
+      <!-- Konfiguration für das Mapping -->
+      <arg name="mode" value="$(eval 'localization' if localization_only else 'mapping')"/>
+      <arg name="scan_topic" value="/scan"/>
+      <arg name="use_rviz" value="$(arg use_rviz)"/> <!-- RViz nur starten, wenn explizit erwünscht -->
+      <arg name="particles" value="60"/> <!-- Optimiert für Raupenfahrzeug -->
+    </include>
   </group>
+  
+  <!-- Statischer TF-Publisher für den RPLiDAR (falls nicht in URDF definiert) -->
+  <node pkg="tf" type="static_transform_publisher" name="rplidar_base_link" 
+        args="0 0 0.2 0 0 0 base_link $(arg rplidar_frame_id) 100" />
 
-  <!-- 4. Starte Tastatur-Teleop-Steuerung -->
-  <include file="$(find sherpa_teleop)/launch/better_teleop_sherpa.launch" />
-
-  <!-- 5. Starte RViz für die Visualisierung (wenn aktiviert) -->
-  <group if="$(arg use_rviz)">
-    <node pkg="rviz" type="rviz" name="rviz" 
-          args="-d $(find sherpa_description)/rviz/sherpa.rviz"
-          unless="$(arg enable_octomap)"/>
-  </group>
-
-  <!-- 6. Starte OctoMap für 3D-Mapping (wenn aktiviert) -->
-  <group if="$(arg enable_octomap)">
-    <!-- Start OctoMap Server konfiguriert für LaserScan-Eingabe -->
-    <node pkg="octomap_server" type="octomap_server_node" name="octomap_server" output="screen">
-      <param name="resolution" value="$(arg octomap_resolution)"/>
-      <param name="frame_id" value="map"/>
-      <param name="sensor_model/max_range" value="$(arg sensor_range)"/>
-      
-      <!-- LaserScan-spezifische Konfiguration -->
-      <param name="height_map" value="false"/>
-      <param name="colored_map" value="false"/>
-      <param name="filter_ground" value="false"/>
-      <param name="ground_filter/distance" value="0.04"/>
-      <param name="ground_filter/angle" value="0.15"/>
-      <param name="ground_filter/plane_distance" value="0.07"/>
-      
-      <!-- Eingabe: LaserScan-Daten vom LiDAR -->
-      <remap from="scan" to="/scan"/>
-      
-      <!-- Basis-Frame für die Transformation -->
-      <param name="base_frame_id" value="base_link"/>
-    </node>
-    
-    <!-- Starte RViz mit OctoMap-Konfiguration -->
-    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find sherpa_description)/rviz/sherpa_octomap.rviz"/>
-  </group>
 </launch>

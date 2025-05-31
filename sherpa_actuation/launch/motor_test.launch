@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Launch file for testing SHERPA motor actuation -->
+  
+  <!-- Arguments -->
+  <arg name="test_mode" default="basic" doc="Test mode: 'basic', 'teleop'"/>
+  <arg name="motor_speed" default="0.75" doc="Maximum motor speed (0.0-1.0)"/>
+  
+  <!-- Launch the SHERPA actuation system -->
+  <include file="$(find sherpa_actuation)/launch/actuation.launch" />
+  
+  <!-- Launch the selected test node based on test_mode -->
+  <group if="$(eval test_mode == 'basic')">
+    <node name="motor_test" pkg="sherpa_actuation" type="motor_test.py" output="screen">
+      <param name="speed" value="$(arg motor_speed)"/>
+    </node>
+  </group>
+  
+  <group if="$(eval test_mode == 'teleop')">
+    <!-- Use the existing teleop node from sherpa_teleop package -->
+    <!-- Nothing to add here, teleop launch is already included in sherpa.launch -->
+  </group>
+  
+</launch>

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Launch file for the SHERPA actuation system -->
+  
+  <!-- Motor configuration parameters -->
+  <arg name="i2c_device" default="/dev/i2c-1" doc="Path to I2C device"/>
+  <arg name="pca9685_address" default="0x40" doc="I2C address of PCA9685 PWM controller"/>
+  <arg name="cmd_vel_topic" default="/cmd_vel" doc="Topic for velocity commands"/>
+  <arg name="cmd_vel_timeout" default="0.5" doc="Timeout for velocity commands (s)"/>
+  
+  <!-- Launch motor node -->
+  <node name="sherpa_motor_node" pkg="sherpa_actuation" type="motor_node" output="screen">
+    <param name="i2c_device" value="$(arg i2c_device)"/>
+    <param name="pca9685_address" value="$(arg pca9685_address)"/>
+    <param name="cmd_vel_timeout" value="$(arg cmd_vel_timeout)"/>
+    <remap from="~cmd_vel" to="$(arg cmd_vel_topic)"/>
+  </node>
+  
+</launch>
