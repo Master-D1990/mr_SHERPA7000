@@ -204,30 +204,39 @@ bool MotorController::stopAllMotors(bool brake) {
 bool MotorController::processVelocityCommand(const geometry_msgs::Twist& twist) {
   // Extract linear and angular velocity components
   double linear_x = twist.linear.x;   // Forward/backward velocity
-  double angular_z = twist.angular.z;  // Rotational velocity
-  
-  // Calculate wheel velocities using a differential drive model
-  // Left side = linear_x - angular_z * wheelbase/2
-  // Right side = linear_x + angular_z * wheelbase/2
-  
-  // For simplicity, we'll assume a normalized wheelbase of 1.0
-  double left_speed = linear_x - angular_z * 0.5;
-  double right_speed = linear_x + angular_z * 0.5;
-  
-  // Normalize values if either exceeds +/-1.0
-  double max_speed = std::max(std::fabs(left_speed), std::fabs(right_speed));
-  if (max_speed > 1.0) {
-    left_speed /= max_speed;
-    right_speed /= max_speed;
-  }
-  
+  double linear_y = twist.linear.y;   // Left/right (strafing) velocity
+  double angular_z = twist.angular.z; // Rotational velocity
+
+  // Mecanum wheel kinematics
+  // wheel_speeds: [front_left, front_right, rear_left, rear_right]
+  // Vx = linear_x, Vy = linear_y, Wz = angular_z
+  // Standard formula (assuming all wheels are mounted in the same orientation):
+  // front_left  = Vx - Vy - Wz
+  // front_right = Vx + Vy + Wz
+  // rear_left   = Vx + Vy - Wz
+  // rear_right  = Vx - Vy + Wz
+
+  double front_left  = linear_x - linear_y - angular_z;
+  double front_right = linear_x + linear_y + angular_z;
+  double rear_left   = linear_x + linear_y - angular_z;
+  double rear_right  = linear_x - linear_y + angular_z;
+
+  // Find the maximum absolute value among the wheel speeds
+  double max_wheel_speed = std::max({std::fabs(front_left), std::fabs(front_right), std::fabs(rear_left), std::fabs(rear_right), 1.0});
+
+  // Normalize speeds if necessary
+  front_left  /= max_wheel_speed;
+  front_right /= max_wheel_speed;
+  rear_left   /= max_wheel_speed;
+  rear_right  /= max_wheel_speed;
+
   // Set motor speeds
   bool success = true;
-  success &= setMotorSpeed(MotorPosition::REAR_LEFT, left_speed);
-  success &= setMotorSpeed(MotorPosition::FRONT_LEFT, left_speed);
-  success &= setMotorSpeed(MotorPosition::REAR_RIGHT, right_speed);
-  success &= setMotorSpeed(MotorPosition::FRONT_RIGHT, right_speed);
-  
+  success &= setMotorSpeed(MotorPosition::FRONT_LEFT,  front_left);
+  success &= setMotorSpeed(MotorPosition::FRONT_RIGHT, front_right);
+  success &= setMotorSpeed(MotorPosition::REAR_LEFT,   rear_left);
+  success &= setMotorSpeed(MotorPosition::REAR_RIGHT,  rear_right);
+
   return success;
 }
 

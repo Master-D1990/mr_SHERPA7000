@@ -31,8 +31,8 @@
   <!-- 2. Starte Motorsteuerung -->
   <include file="$(find sherpa_actuation)/launch/actuation.launch" />
   
-  <!-- 3. Starte Tastatur-Teleop-Steuerung -->
-  <include file="$(find sherpa_teleop)/launch/sherpa_teleop.launch" />
+  <!-- 3. Starte Tastatur-Teleop-Steuerung (deaktiviert, da Teleop auf Desktop laufen soll) -->
+  <!-- <include file="$(find sherpa_teleop)/launch/sherpa_teleop.launch" /> -->
   
   <!-- 4. Starte das 2D-Mapping mit dem sherpa_mapping-Paket -->
   <group if="$(arg enable_mapping)">
