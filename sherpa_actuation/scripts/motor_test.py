@@ -75,46 +75,6 @@ class MotorTester:
         self.stop_motors()
         time.sleep(1.0)  # Pause between actions
     
-    def test_individual_wheels(self, speed=0.3, duration=5.0):
-        """Test each wheel individually by sending different combinations of commands"""
-        rospy.loginfo("Testing individual wheels - observe each wheel's response...")
-        
-        # These combinations should activate specific wheels by combining linear and angular motion
-        # Left side forward
-        self.twist.linear.x = 0.5 * speed
-        self.twist.angular.z = speed
-        rospy.loginfo("Testing left side wheels (forward)")
-        self.cmd_vel_pub.publish(self.twist)
-        time.sleep(duration)
-        self.stop_motors()
-        time.sleep(1.0)
-        
-        # Right side forward
-        self.twist.linear.x = 0.5 * speed
-        self.twist.angular.z = -speed
-        rospy.loginfo("Testing right side wheels (forward)")
-        self.cmd_vel_pub.publish(self.twist)
-        time.sleep(duration)
-        self.stop_motors()
-        time.sleep(1.0)
-        
-        # Left side backward
-        self.twist.linear.x = -0.5 * speed
-        self.twist.angular.z = -speed
-        rospy.loginfo("Testing left side wheels (backward)")
-        self.cmd_vel_pub.publish(self.twist)
-        time.sleep(duration)
-        self.stop_motors()
-        time.sleep(1.0)
-        
-        # Right side backward
-        self.twist.linear.x = -0.5 * speed
-        self.twist.angular.z = speed
-        rospy.loginfo("Testing right side wheels (backward)")
-        self.cmd_vel_pub.publish(self.twist)
-        time.sleep(duration)
-        self.stop_motors()
-        time.sleep(1.0)
 
     def run_test_sequence(self, speed=0.5):
         """Run a complete test sequence for all motor functions"""
@@ -131,7 +91,6 @@ class MotorTester:
         self.turn_right(speed=speed, duration=5.0)
         
         # Individual wheel tests
-        self.test_individual_wheels(speed=speed)
         
         # Test emergency stop
         rospy.loginfo("Testing emergency stop...")

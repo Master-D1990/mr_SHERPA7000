@@ -88,80 +88,80 @@ bool MotorController::setMotorSpeed(MotorPosition motor, double speed) {
   
   // Set GPIO pins for direction control and PWM for speed
   switch (motor) {
-    case MotorPosition::REAR_LEFT:   // TB6612 #1, Motor 1
+    case MotorPosition::FRONT_LEFT:   // TB6612 #1, Motor 1
       // Set GPIO pins for direction - TB6612FNG requires BOTH IN1 and IN2 pins
       if (direction == Direction::FORWARD) {
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M1IN1_PIN, true);   // IN1=HIGH
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M1IN2_PIN, false);  // IN2=LOW
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M1IN1_PIN, true);
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M1IN2_PIN, false);
       } else if (direction == Direction::BACKWARD) {
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M1IN1_PIN, false);  // IN1=LOW
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M1IN2_PIN, true);   // IN2=HIGH
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M1IN1_PIN, false);
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M1IN2_PIN, true);
       } else if (direction == Direction::BRAKE) {
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M1IN1_PIN, true);   // IN1=HIGH
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M1IN2_PIN, true);   // IN2=HIGH
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M1IN1_PIN, true);
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M1IN2_PIN, true);
       } else { // STANDBY
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M1IN1_PIN, false);  // IN1=LOW
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M1IN2_PIN, false);  // IN2=LOW
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M1IN1_PIN, false);
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M1IN2_PIN, false);
       }
       
       // Set PWM for speed control via TB6612FNG - don't pass direction, just speed
       success &= motor_driver_1_->setMotorA(abs_speed, Direction::FORWARD);  // Always forward, GPIO handles direction
       return success;
       
-    case MotorPosition::FRONT_LEFT:  // TB6612 #1, Motor 2
+    case MotorPosition::REAR_LEFT:  // TB6612 #1, Motor 2
       // Set GPIO pins for direction
       if (direction == Direction::FORWARD) {
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M2IN1_PIN, true);   // IN1=LOW
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M2IN2_PIN, false);    // IN2=HIGH
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M2IN1_PIN, true);
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M2IN2_PIN, false);
       } else if (direction == Direction::BACKWARD) {
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M2IN1_PIN, true);    // IN1=HIGH
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M2IN2_PIN, false);   // IN2=LOW
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M2IN1_PIN, false);
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M2IN2_PIN, true);
       } else if (direction == Direction::BRAKE) {
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M2IN1_PIN, true);    // IN1=HIGH
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M2IN2_PIN, true);    // IN2=HIGH
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M2IN1_PIN, true);
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M2IN2_PIN, true);
       } else { // STANDBY
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M2IN1_PIN, false);   // IN1=LOW
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M2IN2_PIN, false);   // IN2=LOW
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M2IN1_PIN, false);
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M2IN2_PIN, false);
       }
       
       // Set PWM for speed control via TB6612FNG - don't pass direction, just speed
       success &= motor_driver_1_->setMotorB(abs_speed, Direction::FORWARD);  // Always forward, GPIO handles direction
       return success;
       
-    case MotorPosition::REAR_RIGHT:  // TB6612 #2, Motor 3
+    case MotorPosition::FRONT_RIGHT:  // TB6612 #2, Motor 3
       // Set GPIO pins for direction
       if (direction == Direction::FORWARD) {
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M3IN1_PIN, true);   // IN1=HIGH
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M3IN2_PIN, false);  // IN2=LOW
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M3IN1_PIN, false);
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M3IN2_PIN, true);
       } else if (direction == Direction::BACKWARD) {
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M3IN1_PIN, false);  // IN1=LOW
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M3IN2_PIN, true);   // IN2=HIGH
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M3IN1_PIN, true);
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M3IN2_PIN, false);
       } else if (direction == Direction::BRAKE) {
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M3IN1_PIN, true);   // IN1=HIGH
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M3IN2_PIN, true);   // IN2=HIGH
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M3IN1_PIN, true);
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M3IN2_PIN, true);
       } else { // STANDBY
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M3IN1_PIN, false);  // IN1=LOW
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M3IN2_PIN, false);  // IN2=LOW
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M3IN1_PIN, false);
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M3IN2_PIN, false);
       }
       
       // Set PWM for speed control via TB6612FNG - don't pass direction, just speed
       success &= motor_driver_2_->setMotorA(abs_speed, Direction::FORWARD);  // Always forward, GPIO handles direction
       return success;
       
-    case MotorPosition::FRONT_RIGHT: // TB6612 #2, Motor 4
+    case MotorPosition::REAR_RIGHT: // TB6612 #2, Motor 4
       // Set GPIO pins for direction
       if (direction == Direction::FORWARD) {
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M4IN1_PIN, true);  // IN1=LOW
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M4IN2_PIN, false);   // IN2=HIGH
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M4IN1_PIN, false);
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M4IN2_PIN, true);
       } else if (direction == Direction::BACKWARD) {
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M4IN1_PIN, true);   // IN1=HIGH
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M4IN2_PIN, false);  // IN2=LOW
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M4IN1_PIN, true);
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M4IN2_PIN, false);
       } else if (direction == Direction::BRAKE) {
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M4IN1_PIN, true);   // IN1=HIGH
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M4IN2_PIN, true);   // IN2=HIGH
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M4IN1_PIN, true);
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M4IN2_PIN, true);
       } else { // STANDBY
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M4IN1_PIN, false);  // IN1=LOW
-        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M4IN2_PIN, false);  // IN2=LOW
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M4IN1_PIN, false);
+        success &= gpio_controller_->setGPIOState(sherpa_control::GPIOController::M4IN2_PIN, false);
       }
       
       // Set PWM for speed control via TB6612FNG - don't pass direction, just speed
