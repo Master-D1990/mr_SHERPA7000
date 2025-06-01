@@ -52,17 +52,11 @@ add_library(tb6612fng
 )
 target_link_libraries(tb6612fng ${catkin_LIBRARIES} pca9685)
 
-## Declare a C++ library for GPIO control
-add_library(gpio_controller
-  src/gpio_controller.cpp
-)
-target_link_libraries(gpio_controller ${catkin_LIBRARIES})
-
 ## Declare a C++ library for the motor controller
 add_library(motor_controller
   src/motor_controller.cpp
 )
-target_link_libraries(motor_controller ${catkin_LIBRARIES} tb6612fng pca9685 gpio_controller)
+target_link_libraries(motor_controller ${catkin_LIBRARIES} tb6612fng pca9685 ${sherpa_control_LIBRARIES})
 
 ## Declare the main motor node
 add_executable(motor_node src/motor_node.cpp)
@@ -70,7 +64,7 @@ target_link_libraries(motor_node ${catkin_LIBRARIES} motor_controller)
 add_dependencies(motor_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Install targets
-install(TARGETS motor_node pca9685 tb6612fng gpio_controller motor_controller
+install(TARGETS motor_node pca9685 tb6612fng motor_controller
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

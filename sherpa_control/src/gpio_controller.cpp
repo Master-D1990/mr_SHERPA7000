@@ -1,4 +1,4 @@
-#include <sherpa_actuation/gpio_controller.h>
+#include <sherpa_control/gpio_controller.h>
 #include <ros/ros.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -9,7 +9,7 @@
 #include <cstring>
 #include <errno.h>
 
-namespace sherpa_actuation {
+namespace sherpa_control {
 
 GPIOController::GPIOController() : initialized_(false) {}
 
@@ -23,6 +23,12 @@ GPIOController::~GPIOController() {
     unexportGPIO(M2IN2_PIN);
     unexportGPIO(M3IN1_PIN);
     unexportGPIO(M3IN2_PIN);
+    unexportGPIO(M4IN1_PIN);
+    unexportGPIO(M4IN2_PIN);
+    unexportGPIO(M5IN1_PIN);
+    unexportGPIO(M5IN2_PIN);
+    unexportGPIO(M6IN1_PIN);
+    unexportGPIO(M6IN2_PIN);
     
     // Close all open file descriptors
     for (auto& fd_pair : gpio_file_descriptors_) {
@@ -42,23 +48,35 @@ bool GPIOController::initialize() {
   
   bool success = true;
   
-  // M1 (Motor 1 & 2)
+  // TB6612 #1 (Motor 1 & 2)
   success &= exportGPIO(M1IN1_PIN);
   success &= setGPIODirection(M1IN1_PIN, "out");
   success &= exportGPIO(M1IN2_PIN);
   success &= setGPIODirection(M1IN2_PIN, "out");
-  
-  // M2 (Motor 3 & 4)
   success &= exportGPIO(M2IN1_PIN);
   success &= setGPIODirection(M2IN1_PIN, "out");
   success &= exportGPIO(M2IN2_PIN);
   success &= setGPIODirection(M2IN2_PIN, "out");
   
-  // M3 (Motor 5 & 6)
+  // TB6612 #2 (Motor 3 & 4)
   success &= exportGPIO(M3IN1_PIN);
   success &= setGPIODirection(M3IN1_PIN, "out");
   success &= exportGPIO(M3IN2_PIN);
   success &= setGPIODirection(M3IN2_PIN, "out");
+  success &= exportGPIO(M4IN1_PIN);
+  success &= setGPIODirection(M4IN1_PIN, "out");
+  success &= exportGPIO(M4IN2_PIN);
+  success &= setGPIODirection(M4IN2_PIN, "out");
+  
+  // TB6612 #3 (Motor 5 & 6)
+  success &= exportGPIO(M5IN1_PIN);
+  success &= setGPIODirection(M5IN1_PIN, "out");
+  success &= exportGPIO(M5IN2_PIN);
+  success &= setGPIODirection(M5IN2_PIN, "out");
+  success &= exportGPIO(M6IN1_PIN);
+  success &= setGPIODirection(M6IN1_PIN, "out");
+  success &= exportGPIO(M6IN2_PIN);
+  success &= setGPIODirection(M6IN2_PIN, "out");
   
   if (success) {
     ROS_INFO("GPIO pins successfully initialized for motor control");
@@ -224,4 +242,4 @@ bool GPIOController::unexportGPIO(int pin_number) {
   return true;
 }
 
-} // namespace sherpa_actuation
+} // namespace sherpa_control
