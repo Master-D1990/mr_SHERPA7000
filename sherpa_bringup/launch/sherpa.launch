@@ -49,4 +49,7 @@
   <node pkg="tf" type="static_transform_publisher" name="rplidar_base_link" 
         args="0 0 0.2 0 0 0 base_link $(arg rplidar_frame_id) 100" />
 
+  <!-- 5. Starte teleop_twist_keyboard für Tastatursteuerung -->
+  <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_keyboard" output="screen" args="--ros-args -r /cmd_vel:=/cmd_vel"/>
+
 </launch>
