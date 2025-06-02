@@ -83,6 +83,13 @@ private:
   std::shared_ptr<sherpa_control::GPIOController> gpio_controller_; // Controls GPIO pins for motor direction
   bool initialized_;
   
+  // Acceleration limiting variables
+  double linear_x_last_ = 0.0;  // Last commanded linear x velocity
+  double linear_y_last_ = 0.0;  // Last commanded linear y velocity
+  double angular_z_last_ = 0.0; // Last commanded angular z velocity
+  double max_accel_ = 0.6;      // Maximum acceleration in units/second
+  ros::Time last_command_time_; // Time of the last velocity command
+  
   // Configuration for TB6612FNG PWM pins on PCA9685
   // Motor driver 1 (left motors)
   static constexpr uint8_t MD1_APWM = 0;  // Motor 1 (Rear Left) PWM
@@ -97,6 +104,7 @@ private:
   // Helper methods
   Direction getDirection(double speed);
   double limitSpeed(double speed);
+  double limitAcceleration(double new_speed, double last_speed);
 };
 
 } // namespace sherpa_actuation

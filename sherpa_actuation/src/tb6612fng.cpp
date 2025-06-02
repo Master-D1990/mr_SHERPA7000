@@ -29,18 +29,18 @@ bool TB6612FNG::initialize() {
 }
 
 bool TB6612FNG::setMotorA(double speed, Direction direction) {
-  // Clamp speed
+  // Nur negative Geschwindigkeiten auf 0 begrenzen
   if (speed < 0.0) speed = 0.0;
-  if (speed > 1.0) speed = 1.0;
+  // Keine Obergrenze mehr, dadurch ist volle Leistung möglich
   
   // Set speed (PWM) only - direction is controlled by GPIO elsewhere
   return pwm_controller_->setDutyCycle(apwm_channel_, speed);
 }
 
 bool TB6612FNG::setMotorB(double speed, Direction direction) {
-  // Clamp speed
+  // Nur negative Geschwindigkeiten auf 0 begrenzen
   if (speed < 0.0) speed = 0.0;
-  if (speed > 1.0) speed = 1.0;
+  // Keine Obergrenze mehr, dadurch ist volle Leistung möglich
   
   // Set speed (PWM) only - direction is controlled by GPIO elsewhere
   return pwm_controller_->setDutyCycle(bpwm_channel_, speed);

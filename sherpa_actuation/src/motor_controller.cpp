@@ -12,9 +12,9 @@ constexpr uint8_t MotorController::MD2_BPWM;
 
 
 MotorController::MotorController(const std::string& i2c_device, uint8_t pca9685_address)
-    : initialized_(false) {
+    : initialized_(false), last_command_time_(ros::Time::now()) {
   // Create the PWM controller
-  pwm_controller_ = std::make_shared<PCA9685>(i2c_device, pca9685_address, 100.0); // 100 Hz PWM frequency
+  pwm_controller_ = std::make_shared<PCA9685>(i2c_device, pca9685_address, 1000.0); // 1000 Hz PWM frequency für optimale DC-Approximation
   
   // Create GPIO controller for direct pin control
   gpio_controller_ = std::make_shared<sherpa_control::GPIOController>();
@@ -207,28 +207,69 @@ bool MotorController::processVelocityCommand(const geometry_msgs::Twist& twist) 
   double linear_y = twist.linear.y;   // Left/right (strafing) velocity
   double angular_z = twist.angular.z; // Rotational velocity
 
-  // Mecanum wheel kinematics
-  // wheel_speeds: [front_left, front_right, rear_left, rear_right]
-  // Vx = linear_x, Vy = linear_y, Wz = angular_z
-  // Standard formula (assuming all wheels are mounted in the same orientation):
-  // front_left  = Vx - Vy - Wz
-  // front_right = Vx + Vy + Wz
-  // rear_left   = Vx + Vy - Wz
-  // rear_right  = Vx - Vy + Wz
+  // Calculate time delta since last command
+  ros::Time now = ros::Time::now();
+  double dt = (now - last_command_time_).toSec();
 
+  // Set minimum and maximum time delta
+  dt = std::max(dt, 0.01);   // Minimum 10ms to prevent division by zero
+  dt = std::min(dt, 0.1);    // Maximum 100ms to prevent excessive acceleration after long pauses
+
+  // Calculate mecanum wheel kinematics for target speed
+  double target_front_left  = linear_x - linear_y - angular_z;
+  double target_front_right = linear_x + linear_y + angular_z;
+  double target_rear_left   = linear_x + linear_y - angular_z;
+  double target_rear_right  = linear_x - linear_y + angular_z;
+
+  // Calculate mecanum wheel kinematics for last speed
+  double last_front_left  = linear_x_last_ - linear_y_last_ - angular_z_last_;
+  double last_front_right = linear_x_last_ + linear_y_last_ + angular_z_last_;
+  double last_rear_left   = linear_x_last_ + linear_y_last_ - angular_z_last_;
+  double last_rear_right  = linear_x_last_ - linear_y_last_ + angular_z_last_;
+
+  // Calculate speed changes for each wheel
+  double delta_fl = target_front_left - last_front_left;
+  double delta_fr = target_front_right - last_front_right;
+  double delta_rl = target_rear_left - last_rear_left;
+  double delta_rr = target_rear_right - last_rear_right;
+
+  // Calculate total absolute acceleration
+  double total_accel = std::fabs(delta_fl) + std::fabs(delta_fr) + 
+                       std::fabs(delta_rl) + std::fabs(delta_rr);
+
+  // Calculate allowed acceleration based on time delta
+  double allowed_accel = max_accel_ * dt * 4.0; // 4.0 because we have 4 wheels
+
+  // If total acceleration exceeds allowed, scale all wheel accelerations
+  if (total_accel > allowed_accel && total_accel > 0.001) {
+    double scale_factor = allowed_accel / total_accel;
+    // Scale the wheel speed changes
+    delta_fl *= scale_factor;
+    delta_fr *= scale_factor;
+    delta_rl *= scale_factor;
+    delta_rr *= scale_factor;
+    // Calculate new target speeds with limited acceleration
+    target_front_left = last_front_left + delta_fl;
+    target_front_right = last_front_right + delta_fr;
+    target_rear_left = last_rear_left + delta_rl;
+    target_rear_right = last_rear_right + delta_rr;
+    // Calculate back to twist components for next cycle
+    linear_x = (target_front_left + target_front_right + target_rear_left + target_rear_right) / 4.0;
+    linear_y = (target_front_right - target_front_left + target_rear_left - target_rear_right) / 4.0;
+    angular_z = (target_front_right - target_front_left - target_rear_left + target_rear_right) / 4.0;
+  }
+
+  // Remember current velocity components and time for next cycle
+  linear_x_last_ = linear_x;
+  linear_y_last_ = linear_y;
+  angular_z_last_ = angular_z;
+  last_command_time_ = now;
+
+  // --- KORREKTE MECANUM-KINEMATIK ---
   double front_left  = linear_x - linear_y - angular_z;
   double front_right = linear_x + linear_y + angular_z;
   double rear_left   = linear_x + linear_y - angular_z;
   double rear_right  = linear_x - linear_y + angular_z;
-
-  // Find the maximum absolute value among the wheel speeds
-  double max_wheel_speed = std::max({std::fabs(front_left), std::fabs(front_right), std::fabs(rear_left), std::fabs(rear_right), 1.0});
-
-  // Normalize speeds if necessary
-  front_left  /= max_wheel_speed;
-  front_right /= max_wheel_speed;
-  rear_left   /= max_wheel_speed;
-  rear_right  /= max_wheel_speed;
 
   // Set motor speeds
   bool success = true;
@@ -255,9 +296,36 @@ Direction MotorController::getDirection(double speed) {
 }
 
 double MotorController::limitSpeed(double speed) {
-  if (speed > 1.0) return 1.0;
-  if (speed < -1.0) return -1.0;
+  // Geschwindigkeitsbegrenzung entfernt
   return speed;
+}
+
+double MotorController::limitAcceleration(double new_speed, double last_speed) {
+  // This method is kept for compatibility but is no longer used
+  // Acceleration limiting is now done in processVelocityCommand by limiting
+  // the total combined wheel acceleration
+  
+  // Calculate time delta since last command
+  ros::Time now = ros::Time::now();
+  double dt = (now - last_command_time_).toSec();
+  
+  // Ensure dt is not too small to prevent division by zero or erratic behavior
+  dt = std::max(dt, 0.01);  // Minimum 10ms
+  
+  // Calculate allowed change based on time and max acceleration
+  double allowed_change = max_accel_ * dt;
+  
+  // Calculate actual change
+  double change = new_speed - last_speed;
+  
+  // Limit the change based on allowed change
+  if (change > allowed_change) {
+    return last_speed + allowed_change;
+  } else if (change < -allowed_change) {
+    return last_speed - allowed_change;
+  }
+  
+  return new_speed;
 }
 
 } // namespace sherpa_actuation

@@ -2,6 +2,8 @@
 """
 Python-Startskript für Teleop auf dem Desktop
 Setzt die ROS-Variablen für den Sherpa-Roboter und startet Teleop
+
+funktionier noch nicht
 """
 import os
 import subprocess

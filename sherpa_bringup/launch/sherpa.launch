@@ -49,7 +49,11 @@
   <node pkg="tf" type="static_transform_publisher" name="rplidar_base_link" 
         args="0 0 0.2 0 0 0 base_link $(arg rplidar_frame_id) 100" />
 
-  <!-- 5. Starte teleop_twist_keyboard für Tastatursteuerung -->
+  <!-- 6. Starte teleop_twist_keyboard für Tastatursteuerung, publiziert auf /cmd_vel -->
   <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_keyboard" output="screen" args="--ros-args -r /cmd_vel:=/cmd_vel"/>
 
+  <!-- 7. Motorsteuerung abonniert jetzt /cmd_vel_filtered statt /cmd_vel (bitte in actuation.launch anpassen) -->
+  
+  <!-- 5. Starte MPU6050-IMU-Node -->
+  <include file="$(find mpu6050_imu)/launch/mpu6050_imu.launch" />
 </launch>

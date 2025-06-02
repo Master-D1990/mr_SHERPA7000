@@ -105,8 +105,11 @@ bool PCA9685::setFrequency(double frequency_hz) {
   
   // Calculate prescale value for desired frequency
   // Formula from PCA9685 datasheet: prescale = round(25MHz / (4096 * frequency)) - 1
-  // Using a lower frequency for better reliability
-  frequency_hz = (frequency_hz > 100.0) ? 100.0 : frequency_hz; // Limit to max 100 Hz
+  // Laut Datenblatt ist der PCA9685 für bis zu 1526 Hz ausgelegt
+  if (frequency_hz > 1526.0) {
+    ROS_WARN("Requested frequency %.1f Hz exceeds PCA9685 maximum of 1526 Hz, limiting", frequency_hz);
+    frequency_hz = 1526.0;
+  }
   ROS_INFO("Setting PCA9685 frequency to %.1f Hz", frequency_hz);
   uint8_t prescale = round(25000000.0 / (4096.0 * frequency_hz)) - 1;
   
@@ -159,9 +162,14 @@ bool PCA9685::setPwm(uint8_t channel, uint16_t on_value, uint16_t off_value) {
 }
 
 bool PCA9685::setDutyCycle(uint8_t channel, double duty_cycle) {
-  // Clamp duty cycle to 0.0-1.0
+  // Nur negative Werte auf 0 begrenzen, obere Grenze entfernt
   if (duty_cycle < 0.0) duty_cycle = 0.0;
-  if (duty_cycle > 1.0) duty_cycle = 1.0;
+  
+  // Sicherstellen, dass wir nicht über 4095 (12-bit) hinausgehen
+  if (duty_cycle > 1.0) {
+    ROS_INFO_THROTTLE(1.0, "Hoher Duty-Cycle Wert: %.2f (wird auf max. 4095 begrenzt)", duty_cycle);
+    duty_cycle = std::min(duty_cycle, 1.0);
+  }
   
   // Convert duty cycle to PWM value (0-4095)
   uint16_t off_value = static_cast<uint16_t>(4095 * duty_cycle);
